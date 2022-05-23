@@ -35,9 +35,11 @@ func (This *BaseService) Login(u systemReq.Login) (err error, userInter *system.
 	}
 
 	var groupInfo system.TGroups
-	_ = global.GVA_DB.Where("gid = ?", userInfo.Gid).First(&groupInfo).Error
-
-	loginInfo.RouterList = groupInfo.RouterList
+	if err = global.GVA_DB.Where("gid = ?", userInfo.Gid).First(&groupInfo).Error; err == nil {
+		loginInfo.RouterList = groupInfo.RouterList
+	} else {
+		err = nil
+	}
 
 	return err, &loginInfo
 }
