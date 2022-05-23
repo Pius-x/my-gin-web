@@ -2,14 +2,37 @@ package request
 
 // PageInfo Paging common input parameter structure
 type PageInfo struct {
-	Page     int `json:"page" form:"page"`         // 页码
-	PageSize int `json:"pageSize" form:"pageSize"` // 每页大小
+	Page     int    `json:"page" form:"page"`         // 页码
+	PageSize int    `json:"pageSize" form:"pageSize"` // 每页大小
 	Keyword  string `json:"keyword" form:"keyword"`   //关键字
+}
+
+// UserList Paging common input parameter structure
+type UserList struct {
+	Page     uint64 `json:"page" form:"page"`         // 页码
+	PageSize uint64 `json:"pageSize" form:"pageSize"` // 每页大小
+	Gid      uint64 `json:"gid" form:"gid"`           // 分组id
+	Keyword  string `json:"keyword" form:"keyword"`   //关键字
+}
+
+// UserListByGid Paging common input parameter structure
+type UserListByGid struct {
+	Gid uint64 `json:"gid" form:"gid"` // 分组id
+}
+
+// SearchUser  Paging common input parameter structure
+type SearchUser struct {
+	Condition int `json:"condition"` // 条件
+}
+
+// GetGroupListById  Paging common input parameter structure
+type GetGroupListById struct {
+	Gid uint64 `json:"gid" form:"gid"` // 分组Id
 }
 
 // GetById Find by id structure
 type GetById struct {
-	ID int `json:"id" form:"id"` // 主键ID
+	ID uint64 `json:"id" form:"id"` // 主键ID
 }
 
 func (r *GetById) Uint() uint {

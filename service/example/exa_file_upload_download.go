@@ -27,7 +27,7 @@ func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownl
 //@param: id uint
 //@return: error, model.ExaFileUploadAndDownload
 
-func (e *FileUploadAndDownloadService) FindFile(id uint) (error, example.ExaFileUploadAndDownload) {
+func (e *FileUploadAndDownloadService) FindFile(id uint64) (error, example.ExaFileUploadAndDownload) {
 	var file example.ExaFileUploadAndDownload
 	err := global.GVA_DB.Where("id = ?", id).First(&file).Error
 	return err, file

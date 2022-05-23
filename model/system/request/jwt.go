@@ -1,9 +1,6 @@
 package request
 
-import (
-	"github.com/golang-jwt/jwt/v4"
-	uuid "github.com/satori/go.uuid"
-)
+import "github.com/golang-jwt/jwt/v4"
 
 // Custom claims structure
 type CustomClaims struct {
@@ -13,9 +10,7 @@ type CustomClaims struct {
 }
 
 type BaseClaims struct {
-	UUID        uuid.UUID
-	ID          uint
-	Username    string
-	NickName    string
-	AuthorityId string
+	ID       uint64
+	Account  string
+	Password string
 }

@@ -6,7 +6,7 @@ import (
 
 // file struct, 文件结构体
 type ExaFile struct {
-	global.GVA_MODEL
+	global.GvaModel
 	FileName     string
 	FileMd5      string
 	FilePath     string
@@ -17,8 +17,8 @@ type ExaFile struct {
 
 // file chunk struct, 切片结构体
 type ExaFileChunk struct {
-	global.GVA_MODEL
-	ExaFileID       uint
+	global.GvaModel
+	ExaFileID       uint64
 	FileChunkNumber int
 	FileChunkPath   string
 }

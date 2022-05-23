@@ -85,10 +85,8 @@ func (u *FileUploadAndDownloadApi) GetFileList(c *gin.Context) {
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
-			List:     list,
-			Total:    total,
-			Page:     pageInfo.Page,
-			PageSize: pageInfo.PageSize,
+			List:  list,
+			Total: total,
 		}, "获取成功", c)
 	}
 }

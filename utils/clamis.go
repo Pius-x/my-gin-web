@@ -4,7 +4,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"github.com/gin-gonic/gin"
-	uuid "github.com/satori/go.uuid"
+	"go.uber.org/zap"
 )
 
 func GetClaims(c *gin.Context) (*systemReq.CustomClaims, error) {
@@ -12,13 +12,13 @@ func GetClaims(c *gin.Context) (*systemReq.CustomClaims, error) {
 	j := NewJWT()
 	claims, err := j.ParseToken(token)
 	if err != nil {
-		global.GVA_LOG.Error("从Gin的Context中获取从jwt解析信息失败, 请检查请求头是否存在x-token且claims是否为规定结构")
+		global.GVA_LOG.Error(err.Error(), zap.Error(err))
 	}
 	return claims, err
 }
 
-// 从Gin的Context中获取从jwt解析出来的用户ID
-func GetUserID(c *gin.Context) uint {
+// GetOperatorID 从Gin的Context中获取从jwt解析出来的用户ID
+func GetOperatorID(c *gin.Context) uint64 {
 	if claims, exists := c.Get("claims"); !exists {
 		if cl, err := GetClaims(c); err != nil {
 			return 0
@@ -31,33 +31,47 @@ func GetUserID(c *gin.Context) uint {
 	}
 }
 
-// 从Gin的Context中获取从jwt解析出来的用户UUID
-func GetUserUuid(c *gin.Context) uuid.UUID {
-	if claims, exists := c.Get("claims"); !exists {
-		if cl, err := GetClaims(c); err != nil {
-			return uuid.UUID{}
-		} else {
-			return cl.UUID
-		}
-	} else {
-		waitUse := claims.(*systemReq.CustomClaims)
-		return waitUse.UUID
-	}
-}
-
-// 从Gin的Context中获取从jwt解析出来的用户角色id
-func GetUserAuthorityId(c *gin.Context) string {
+// GetOperatorAccount  从Gin的Context中获取从jwt解析出来的用户Account
+func GetOperatorAccount(c *gin.Context) string {
 	if claims, exists := c.Get("claims"); !exists {
 		if cl, err := GetClaims(c); err != nil {
 			return ""
 		} else {
-			return cl.AuthorityId
+			return cl.Account
 		}
 	} else {
 		waitUse := claims.(*systemReq.CustomClaims)
-		return waitUse.AuthorityId
+		return waitUse.Account
 	}
 }
+
+//// 从Gin的Context中获取从jwt解析出来的用户UUID
+//func GetUserUuid(c *gin.Context) uuid.UUID {
+//	if claims, exists := c.Get("claims"); !exists {
+//		if cl, err := GetClaims(c); err != nil {
+//			return uuid.UUID{}
+//		} else {
+//			return cl.UUID
+//		}
+//	} else {
+//		waitUse := claims.(*systemReq.CustomClaims)
+//		return waitUse.UUID
+//	}
+//}
+//
+//// 从Gin的Context中获取从jwt解析出来的用户角色id
+//func GetUserAuthorityId(c *gin.Context) string {
+//	if claims, exists := c.Get("claims"); !exists {
+//		if cl, err := GetClaims(c); err != nil {
+//			return ""
+//		} else {
+//			return cl.AuthorityId
+//		}
+//	} else {
+//		waitUse := claims.(*systemReq.CustomClaims)
+//		return waitUse.AuthorityId
+//	}
+//}
 
 // 从Gin的Context中获取从jwt解析出来的用户角色id
 func GetUserInfo(c *gin.Context) *systemReq.CustomClaims {

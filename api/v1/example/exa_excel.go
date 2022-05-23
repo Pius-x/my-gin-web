@@ -3,11 +3,9 @@ package example
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"os"
-	"strings"
 )
 
 type ExcelApi struct{}
@@ -25,23 +23,23 @@ type ExcelApi struct{}
 // @Param data body example.ExcelInfo true "导出Excel文件信息"
 // @Success 200
 // @Router /excel/exportExcel [post]
-func (e *ExcelApi) ExportExcel(c *gin.Context) {
-	var excelInfo example.ExcelInfo
-	_ = c.ShouldBindJSON(&excelInfo)
-	if strings.Index(excelInfo.FileName, "..") > -1 {
-		response.FailWithMessage("包含非法字符", c)
-		return
-	}
-	filePath := global.GVA_CONFIG.Excel.Dir + excelInfo.FileName
-	err := excelService.ParseInfoList2Excel(excelInfo.InfoList, filePath)
-	if err != nil {
-		global.GVA_LOG.Error("转换Excel失败!", zap.Error(err))
-		response.FailWithMessage("转换Excel失败", c)
-		return
-	}
-	c.Writer.Header().Add("success", "true")
-	c.File(filePath)
-}
+//func (e *ExcelApi) ExportExcel(c *gin.Context) {
+//	var excelInfo example.ExcelInfo
+//	_ = c.ShouldBindJSON(&excelInfo)
+//	if strings.Index(excelInfo.FileName, "..") > -1 {
+//		response.FailWithMessage("包含非法字符", c)
+//		return
+//	}
+//	filePath := global.GVA_CONFIG.Excel.Dir + excelInfo.FileName
+//	err := excelService.ParseInfoList2Excel(excelInfo.InfoList, filePath)
+//	if err != nil {
+//		global.GVA_LOG.Error("转换Excel失败!", zap.Error(err))
+//		response.FailWithMessage("转换Excel失败", c)
+//		return
+//	}
+//	c.Writer.Header().Add("success", "true")
+//	c.File(filePath)
+//}
 
 // @Tags excel
 // @Summary 导入Excel文件
@@ -68,20 +66,18 @@ func (e *ExcelApi) ImportExcel(c *gin.Context) {
 // @Produce  application/json
 // @Success 200 {object} response.Response{data=response.PageResult,msg=string} "加载Excel数据,返回包括列表,总数,页码,每页数量"
 // @Router /excel/loadExcel [get]
-func (e *ExcelApi) LoadExcel(c *gin.Context) {
-	menus, err := excelService.ParseExcel2InfoList()
-	if err != nil {
-		global.GVA_LOG.Error("加载数据失败!", zap.Error(err))
-		response.FailWithMessage("加载数据失败", c)
-		return
-	}
-	response.OkWithDetailed(response.PageResult{
-		List:     menus,
-		Total:    int64(len(menus)),
-		Page:     1,
-		PageSize: 999,
-	}, "加载数据成功", c)
-}
+//func (e *ExcelApi) LoadExcel(c *gin.Context) {
+//	menus, err := excelService.ParseExcel2InfoList()
+//	if err != nil {
+//		global.GVA_LOG.Error("加载数据失败!", zap.Error(err))
+//		response.FailWithMessage("加载数据失败", c)
+//		return
+//	}
+//	response.OkWithDetailed(response.PageResult{
+//		List:  menus,
+//		Total: int64(len(menus)),
+//	}, "加载数据成功", c)
+//}
 
 // @Tags excel
 // @Summary 下载模板

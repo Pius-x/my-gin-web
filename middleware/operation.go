@@ -2,11 +2,8 @@ package middleware
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -33,7 +30,7 @@ func init() {
 func OperationRecord() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body []byte
-		var userId int
+		var userAccount = ""
 		if c.Request.Method != http.MethodGet {
 			var err error
 			body, err = ioutil.ReadAll(c.Request.Body)
@@ -43,35 +40,33 @@ func OperationRecord() gin.HandlerFunc {
 				c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			}
 		} else {
-			query := c.Request.URL.RawQuery
-			query, _ = url.QueryUnescape(query)
-			split := strings.Split(query, "&")
-			m := make(map[string]string)
-			for _, v := range split {
-				kv := strings.Split(v, "=")
-				if len(kv) == 2 {
-					m[kv[0]] = kv[1]
-				}
-			}
-			body, _ = json.Marshal(&m)
+			return
+			//query := c.Request.URL.RawQuery
+			//query, _ = url.QueryUnescape(query)
+			//split := strings.Split(query, "&")
+			//m := make(map[string]string)
+			//for _, v := range split {
+			//	kv := strings.Split(v, "=")
+			//	if len(kv) == 2 {
+			//		m[kv[0]] = kv[1]
+			//	}
+			//}
+			//body, _ = json.Marshal(&m)
 		}
 		claims, _ := utils.GetClaims(c)
-		if claims.ID != 0 {
-			userId = int(claims.ID)
+		if claims.Account != "" {
+			userAccount = claims.Account
 		} else {
-			id, err := strconv.Atoi(c.Request.Header.Get("x-user-id"))
-			if err != nil {
-				userId = 0
-			}
-			userId = id
+			userAccount = c.Request.Header.Get("x-account")
 		}
+
 		record := system.SysOperationRecord{
-			Ip:     c.ClientIP(),
-			Method: c.Request.Method,
-			Path:   c.Request.URL.Path,
-			Agent:  c.Request.UserAgent(),
-			Body:   string(body),
-			UserID: userId,
+			Ip:          c.ClientIP(),
+			Method:      c.Request.Method,
+			Path:        c.Request.URL.Path,
+			Agent:       c.Request.UserAgent(),
+			Body:        string(body),
+			UserAccount: userAccount,
 		}
 
 		// 上传文件时候 中间件日志进行裁断操作
@@ -96,8 +91,8 @@ func OperationRecord() gin.HandlerFunc {
 
 		latency := time.Since(now)
 		record.ErrorMessage = c.Errors.ByType(gin.ErrorTypePrivate).String()
-		record.Status = c.Writer.Status()
-		record.Latency = latency
+		record.Status = uint64(c.Writer.Status())
+		record.Latency = uint64(latency)
 		record.Resp = writer.body.String()
 
 		if strings.Index(c.Writer.Header().Get("Pragma"), "public") > -1 ||
