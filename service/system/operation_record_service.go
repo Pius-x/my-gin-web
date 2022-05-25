@@ -68,8 +68,8 @@ func (This *OperationRecordService) GetSysOperationRecordInfoList(info systemReq
 	db := global.GVA_DB.Model(&system.SysOperationRecord{})
 	var sysOperationRecords []system.SysOperationRecord
 	// 如果有条件搜索 下方会自动创建搜索语句
-	if info.Method != "" {
-		db = db.Where("method = ?", info.Method)
+	if info.UserAccount != "" {
+		db = db.Where("user_account = ?", info.UserAccount)
 	}
 	if info.Path != "" {
 		db = db.Where("path LIKE ?", "%"+info.Path+"%")
