@@ -2,23 +2,25 @@ package initialize
 
 import (
 	"fmt"
+	"github.com/my-gin-web/utils/dbInstance"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/config"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/my-gin-web/config"
+	"github.com/my-gin-web/global"
+	"github.com/my-gin-web/utils"
 )
 
 func Timer() {
-	if global.GVA_CONFIG.Timer.Start {
-		for i := range global.GVA_CONFIG.Timer.Detail {
+	if global.Config.Timer.Start {
+		for i := range global.Config.Timer.Detail {
 			go func(detail config.Detail) {
-				global.GVA_Timer.AddTaskByFunc("ClearDB", global.GVA_CONFIG.Timer.Spec, func() {
-					err := utils.ClearTable(global.GVA_DB, detail.TableName, detail.CompareField, detail.Interval)
+				_, _ = global.Timer.AddTaskByFunc("ClearDB", global.Config.Timer.Spec, func() {
+					err := utils.ClearTable(dbInstance.SelectConn(), detail.TableName, detail.CompareField, detail.Interval)
 					if err != nil {
 						fmt.Println("timer error:", err)
 					}
 				})
-			}(global.GVA_CONFIG.Timer.Detail[i])
+
+			}(global.Config.Timer.Detail[i])
 		}
 	}
 }

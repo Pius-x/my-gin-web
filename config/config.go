@@ -10,17 +10,12 @@ type Server struct {
 	Captcha Captcha `mapstructure:"captcha" json:"captcha" yaml:"captcha"`
 	// auto
 	AutoCode Autocode `mapstructure:"autocode" json:"autocode" yaml:"autocode"`
-	// gorm
-	Mysql  Mysql `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
-	Pgsql  Pgsql `mapstructure:"pgsql" json:"pgsql" yaml:"pgsql"`
-	DBList []DB  `mapstructure:"db-list" json:"db-list" yaml:"db-list"`
+	// mysql
+	DbLogZap bool    `mapstructure:"db-log-zap" json:"db-log-zap" yaml:"db-log-zap"`
+	DBList   []Mysql `mapstructure:"db-list" json:"db-list" yaml:"db-list"`
+
 	// oss
-	Local      Local      `mapstructure:"local" json:"local" yaml:"local"`
-	Qiniu      Qiniu      `mapstructure:"qiniu" json:"qiniu" yaml:"qiniu"`
-	AliyunOSS  AliyunOSS  `mapstructure:"aliyun-oss" json:"aliyun-oss" yaml:"aliyun-oss"`
-	HuaWeiObs  HuaWeiObs  `mapstructure:"hua-wei-obs" json:"hua-wei-obs" yaml:"hua-wei-obs"`
-	TencentCOS TencentCOS `mapstructure:"tencent-cos" json:"tencent-cos" yaml:"tencent-cos"`
-	AwsS3      AwsS3      `mapstructure:"aws-s3" json:"aws-s3" yaml:"aws-s3"`
+	Local Local `mapstructure:"local" json:"local" yaml:"local"`
 
 	Excel Excel `mapstructure:"excel" json:"excel" yaml:"excel"`
 	Timer Timer `mapstructure:"timer" json:"timer" yaml:"timer"`

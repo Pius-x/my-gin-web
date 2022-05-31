@@ -12,5 +12,5 @@ var (
 	UpdateGroupRouterVerify  = Rules{"Gid": {NotEmpty()}, "RouterList": {NotEmpty()}}
 	AuthorityIdVerify        = Rules{"Gid": {NotEmpty()}}
 	ChangePasswordVerify     = Rules{"Username": {NotEmpty()}, "Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
-	UpdateHeadPicVerify      = Rules{"Account": {NotEmpty()}, "HeadPic": {NotEmpty()}}
+	UpdateHeadPicVerify      = Rules{"Id": {NotEmpty()}, "HeadPic": {NotEmpty()}}
 )

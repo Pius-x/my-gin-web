@@ -1,7 +1,7 @@
 package example
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/my-gin-web/global"
 )
 
 // file struct, 文件结构体
@@ -18,7 +18,7 @@ type ExaFile struct {
 // file chunk struct, 切片结构体
 type ExaFileChunk struct {
 	global.GvaModel
-	ExaFileID       uint64
+	ExaFileID       int64
 	FileChunkNumber int
 	FileChunkPath   string
 }

@@ -1,12 +1,27 @@
 package router
 
-import (
-	"github.com/flipped-aurora/gin-vue-admin/server/router/system"
+import "github.com/my-gin-web/api"
+
+var (
+	BaseApi            = new(api.BaseApi)
+	UserApi            = new(api.UserApi)
+	GroupApi           = new(api.GroupApi)
+	OperationRecordApi = new(api.OperationRecordApi)
 )
 
-type RouterGroup struct {
-	System system.RouterGroup
-	//Example  example.RouterGroup
+var (
+	ExcelApi                 = new(api.ExcelApi)
+	FileUploadAndDownloadApi = new(api.FileUploadAndDownloadApi)
+)
+
+type Group struct {
+	BaseRouter
+	UserRouter
+	GroupRouter
+	OperationLogRouter
+
+	ExcelRouter
+	FileUploadAndDownloadRouter
 }
 
-var RouterGroupApp = new(RouterGroup)
+var GroupApp = new(Group)

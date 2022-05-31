@@ -9,9 +9,9 @@ import (
 
 	"github.com/songzhibin97/gkit/cache/local_cache"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	_ "github.com/flipped-aurora/gin-vue-admin/server/packfile"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/my-gin-web/global"
+	_ "github.com/my-gin-web/packfile"
+	"github.com/my-gin-web/utils"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -49,18 +49,18 @@ func Viper(path ...string) *viper.Viper {
 
 	v.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("config file changed:", e.Name)
-		if err := v.Unmarshal(&global.GVA_CONFIG); err != nil {
+		if err := v.Unmarshal(&global.Config); err != nil {
 			fmt.Println(err)
 		}
 	})
-	if err := v.Unmarshal(&global.GVA_CONFIG); err != nil {
+	if err := v.Unmarshal(&global.Config); err != nil {
 		fmt.Println(err)
 	}
 	// root 适配性
 	// 根据root位置去找到对应迁移位置,保证root路径有效
-	global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
+	global.Config.AutoCode.Root, _ = filepath.Abs("..")
 	global.BlackCache = local_cache.NewCache(
-		local_cache.SetDefaultExpire(time.Second * time.Duration(global.GVA_CONFIG.JWT.ExpiresTime)),
+		local_cache.SetDefaultExpire(time.Second * time.Duration(global.Config.JWT.ExpiresTime)),
 	)
 	return v
 }

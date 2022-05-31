@@ -1,11 +1,11 @@
 package api
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	email_response "github.com/flipped-aurora/gin-vue-admin/server/plugin/email/model/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/plugin/email/service"
 	"github.com/gin-gonic/gin"
+	"github.com/my-gin-web/global"
+	"github.com/my-gin-web/model/common/response"
+	email_response "github.com/my-gin-web/plugin/email/model/response"
+	"github.com/my-gin-web/plugin/email/service"
 	"go.uber.org/zap"
 )
 
@@ -19,7 +19,7 @@ type EmailApi struct{}
 // @Router /email/emailTest [post]
 func (s *EmailApi) EmailTest(c *gin.Context) {
 	if err := service.ServiceGroupApp.EmailTest(); err != nil {
-		global.GVA_LOG.Error("发送失败!", zap.Error(err))
+		global.ZapLog.Error("发送失败!", zap.Error(err))
 		response.FailWithMessage("发送失败", c)
 	} else {
 		response.OkWithData("发送成功", c)
@@ -37,7 +37,7 @@ func (s *EmailApi) SendEmail(c *gin.Context) {
 	var email email_response.Email
 	_ = c.ShouldBindJSON(&email)
 	if err := service.ServiceGroupApp.SendEmail(email.To, email.Subject, email.Body); err != nil {
-		global.GVA_LOG.Error("发送失败!", zap.Error(err))
+		global.ZapLog.Error("发送失败!", zap.Error(err))
 		response.FailWithMessage("发送失败", c)
 	} else {
 		response.OkWithData("发送成功", c)

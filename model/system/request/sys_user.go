@@ -10,15 +10,15 @@ type Login struct {
 
 // Modify password structure
 type ChangePasswordStruct struct {
-	Username    string `json:"username"`    // 用户名
-	Password    string `json:"password"`    // 密码
-	NewPassword string `json:"newPassword"` // 新密码
+	Id          int64  `form:"id"`          // 用户ID
+	Password    string `form:"password"`    // 原密码
+	NewPassword string `form:"newPassword"` // 新密码
 }
 
 // Modify password structure
 type UpdateHeadPicStruct struct {
-	Account string `json:"account"` // 用户名
-	HeadPic uint64 `json:"headPic"` // 头像ID
+	Id      int64 `form:"id"`      // 用户ID
+	HeadPic int64 `form:"headPic"` // 头像ID
 }
 
 // Modify  user's auth structure
@@ -28,20 +28,20 @@ type SetUserAuth struct {
 
 // Modify  user's auth structure
 type SetUserAuthorities struct {
-	ID           uint64
+	ID           int64
 	AuthorityIds []string `json:"authorityIds"` // 角色ID
 }
 
 type UpdateUserInfo struct {
-	Id     uint64 `json:"id"`
-	Gid    uint64 `json:"gid"`    //分组ID
+	Id     int64  `json:"id"`
+	Gid    int64  `json:"gid"`    //分组ID
 	Name   string `json:"name"`   //用户昵称
 	Mobile string `json:"mobile"` //手机号码
 }
 
 type UpdateUserGid struct {
-	Id  uint64 `json:"id,omitempty"`
-	Gid uint64 `json:"gid,omitempty"`
+	Id  int64 `json:"id,omitempty"`
+	Gid int64 `json:"gid,omitempty"`
 }
 
 type MultiUpdateUserGid struct {
@@ -49,11 +49,11 @@ type MultiUpdateUserGid struct {
 }
 
 type CreateUserInfo struct {
-	Id         uint64 `json:"id"`
+	Id         int64  `json:"id"`
 	Account    string `json:"account"`     //账号
-	Gid        uint64 `json:"gid"`         //分组ID
+	Gid        int64  `json:"gid"`         //分组ID
 	Name       string `json:"name"`        //用户昵称
 	Mobile     string `json:"mobile"`      //手机号码
-	CreateTime uint64 `json:"create_time"` //创建时间
+	CreateTime int64  `json:"create_time"` //创建时间
 	CreateBy   string `json:"create_by"`   //创建人
 }

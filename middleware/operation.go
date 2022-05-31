@@ -2,22 +2,18 @@ package middleware
 
 import (
 	"bytes"
+	"github.com/gin-gonic/gin"
+	system2 "github.com/my-gin-web/api"
+	"github.com/my-gin-web/global"
+	"github.com/my-gin-web/model/operationlog"
+	"github.com/my-gin-web/utils"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
-
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/service"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
-
-var operationRecordService = service.ServiceGroupApp.SystemServiceGroup.OperationRecordService
 
 var respPool sync.Pool
 
@@ -35,7 +31,7 @@ func OperationRecord() gin.HandlerFunc {
 			var err error
 			body, err = ioutil.ReadAll(c.Request.Body)
 			if err != nil {
-				global.GVA_LOG.Error("read body from request error:", zap.Error(err))
+				global.ZapLog.Error("read body from request error:", zap.Error(err))
 			} else {
 				c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			}
@@ -60,7 +56,7 @@ func OperationRecord() gin.HandlerFunc {
 			userAccount = c.Request.Header.Get("x-account")
 		}
 
-		record := system.SysOperationRecord{
+		record := operationlog.SysOperationRecord{
 			Ip:          c.ClientIP(),
 			Method:      c.Request.Method,
 			Path:        c.Request.URL.Path,
@@ -113,8 +109,8 @@ func OperationRecord() gin.HandlerFunc {
 			}
 		}
 
-		if err := operationRecordService.CreateSysOperationRecord(record); err != nil {
-			global.GVA_LOG.Error("create operation record error:", zap.Error(err))
+		if err := system2.OperationRecordService.CreateSysOperationRecord(record); err != nil {
+			global.ZapLog.Error("create operation record error:", zap.Error(err))
 		}
 	}
 }

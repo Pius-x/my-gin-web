@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/my-gin-web/utils"
 )
 
 // InterceptHandler 拦截器

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/initialize"
+	"github.com/my-gin-web/global"
+	"github.com/my-gin-web/initialize"
 	"go.uber.org/zap"
 )
 
@@ -14,7 +14,7 @@ type server interface {
 }
 
 func RunWindowsServer() {
-	if global.GVA_CONFIG.System.UseMultipoint || global.GVA_CONFIG.System.UseRedis {
+	if global.Config.System.UseMultipoint || global.Config.System.UseRedis {
 		// 初始化redis服务
 		initialize.Redis()
 	}
@@ -22,12 +22,12 @@ func RunWindowsServer() {
 	Router := initialize.Routers()
 	Router.Static("/form-generator", "./resource/page")
 
-	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
+	address := fmt.Sprintf(":%d", global.Config.System.Addr)
 	s := initServer(address, Router)
 	// 保证文本顺序输出
 	// In order to ensure that the text order output can be deleted
 	time.Sleep(10 * time.Microsecond)
-	global.GVA_LOG.Info("server run success on ", zap.String("address", address))
+	global.ZapLog.Info("server run success on ", zap.String("address", address))
 
-	global.GVA_LOG.Error(s.ListenAndServe().Error())
+	global.ZapLog.Error(s.ListenAndServe().Error())
 }

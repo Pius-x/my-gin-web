@@ -10,7 +10,7 @@ type CustomClaims struct {
 }
 
 type BaseClaims struct {
-	ID       uint64
+	ID       int64
 	Account  string
 	Password string
 }

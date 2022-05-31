@@ -1,7 +1,7 @@
 package global
 
 type GvaModel struct {
-	ID        uint64 `gorm:"primarykey"` // 主键ID
-	CreatedAt uint64 // 创建时间
-	UpdatedAt uint64 // 更新时间
+	ID        int64 `db:"id"`         // 主键ID
+	CreatedAt int64 `db:"created_at"` // 创建时间
+	UpdatedAt int64 `db:"updated_at"` // 更新时间
 }

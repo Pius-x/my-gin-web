@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"github.com/gin-gonic/gin"
+	"github.com/my-gin-web/global"
+	systemReq "github.com/my-gin-web/model/system/request"
 	"go.uber.org/zap"
 )
 
@@ -12,13 +12,13 @@ func GetClaims(c *gin.Context) (*systemReq.CustomClaims, error) {
 	j := NewJWT()
 	claims, err := j.ParseToken(token)
 	if err != nil {
-		global.GVA_LOG.Error(err.Error(), zap.Error(err))
+		global.ZapLog.Error(err.Error(), zap.Error(err))
 	}
 	return claims, err
 }
 
 // GetOperatorID 从Gin的Context中获取从jwt解析出来的用户ID
-func GetOperatorID(c *gin.Context) uint64 {
+func GetOperatorID(c *gin.Context) int64 {
 	if claims, exists := c.Get("claims"); !exists {
 		if cl, err := GetClaims(c); err != nil {
 			return 0

@@ -1,13 +1,19 @@
 package service
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/service/example"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"github.com/my-gin-web/model/group"
+	"github.com/my-gin-web/model/operationlog"
+	"github.com/my-gin-web/model/user"
 )
 
-type ServiceGroup struct {
-	SystemServiceGroup  system.ServiceGroup
-	ExampleServiceGroup example.ServiceGroup
-}
+var (
+	userModel         *user.Model
+	groupModel        *group.Model
+	operationLogModel *operationlog.Model
+)
 
-var ServiceGroupApp = new(ServiceGroup)
+func InitModel() {
+	userModel = user.NewModel()
+	groupModel = group.NewModel()
+	operationLogModel = operationlog.NewModel()
+}
