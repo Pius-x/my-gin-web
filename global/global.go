@@ -16,12 +16,13 @@ import (
 )
 
 var (
-	Redis     *redis.Client
-	ZapLog    *zap.Logger
-	Config    config.Server
-	_         *viper.Viper
-	GormDbMap map[string]*gorm.DB
-	DbMap     map[string]*sqlx.DB
+	Redis        *redis.Client
+	ZapLog       *zap.Logger
+	ZapCallerLog *zap.Logger
+	Config       config.Server
+	_            *viper.Viper
+	GormDbMap    map[string]*gorm.DB
+	DbMap        map[string]*sqlx.DB
 
 	Timer              = timer.NewTimerTask()
 	ConcurrencyControl = &singleflight.Group{}

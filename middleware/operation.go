@@ -109,9 +109,8 @@ func OperationRecord() gin.HandlerFunc {
 			}
 		}
 
-		if err := system2.OperationRecordService.CreateSysOperationRecord(record); err != nil {
-			global.ZapLog.Error("create operation record error:", zap.Error(err))
-		}
+		// 新增操作记录
+		system2.OperationRecordService.CreateSysOperationRecord(record)
 	}
 }
 

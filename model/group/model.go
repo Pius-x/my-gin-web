@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/my-gin-web/utils/dbInstance"
+	"github.com/pkg/errors"
 )
 
 func NewModel() *Model {
@@ -28,10 +29,10 @@ func (This *Model) GetRouterList(gid int64) string {
 	return routerString
 }
 
-func (This *Model) GetAllGroups() (allGroups []GroupInfo, err error) {
+func (This *Model) GetAllGroups() (allGroups []GroupInfo) {
 	var groups []TGroups
-	if err = This.db.Select(&groups, "SELECT * from gva.t_groups"); err != nil {
-		return nil, err
+	if err := This.db.Select(&groups, "SELECT * from gva.t_groups"); err != nil {
+		panic(errors.WithStack(err))
 	}
 
 	for i := 0; i < len(groups); i++ {
@@ -45,17 +46,19 @@ func (This *Model) GetAllGroups() (allGroups []GroupInfo, err error) {
 			UpdateTime: oneGroup.UpdateTime,
 			Children:   nil,
 		}
-		_ = json.Unmarshal([]byte(oneGroup.RouterList), &one.RouterList)
+
+		if err := json.Unmarshal([]byte(oneGroup.RouterList), &one.RouterList); err != nil {
+			panic(errors.Wrap(err, "权限列表解析失败"))
+		}
 
 		allGroups = append(allGroups, one)
 	}
 
-	return allGroups, err
+	return allGroups
 }
 
 func (This *Model) GetGroupCountByGid(gid int64) (total int64) {
 	if err := This.db.Get(&total, "SELECT COUNT(1) from gva.t_groups where gid = ?", gid); err != nil {
-		fmt.Printf("err %+v \n", err)
 		return 0
 	}
 
@@ -70,11 +73,11 @@ func (This *Model) GetGroupCountByParentGid(gid int64) (total int64) {
 	return total
 }
 
-func (This *Model) GetOneGroupInfo(gid int64) (groupInfo GroupInfo, err error) {
+func (This *Model) GetOneGroupInfo(gid int64) (groupInfo GroupInfo) {
 	var tGroup TGroups
 
-	if err = This.db.Get(&tGroup, "select * from gva.t_groups where gid = ?", gid); err != nil {
-		return GroupInfo{}, err
+	if err := This.db.Get(&tGroup, "select * from gva.t_groups where gid = ?", gid); err != nil {
+		panic(fmt.Sprintf("未找到分组信息，gid：%d", gid))
 	}
 
 	groupInfo = GroupInfo{
@@ -88,48 +91,54 @@ func (This *Model) GetOneGroupInfo(gid int64) (groupInfo GroupInfo, err error) {
 	}
 	_ = json.Unmarshal([]byte(tGroup.RouterList), &groupInfo.RouterList)
 
-	return groupInfo, err
+	return groupInfo
 }
 
-func (This *Model) GetOneGroupRouterList(gid int64) (routerList []RouteInfo, err error) {
+func (This *Model) GetOneGroupRouterList(gid int64) (routerList []RouteInfo) {
 
 	var routerInfo string
-
-	if err = This.db.Get(&routerInfo, "select router_list from gva.t_groups where gid = ?", gid); err != nil {
-		return nil, err
+	if err := This.db.Get(&routerInfo, "select router_list from gva.t_groups where gid = ?", gid); err != nil {
+		panic(errors.Wrap(err, fmt.Sprintf("权限列表为空，gid：%d", gid)))
 	}
 
-	_ = json.Unmarshal([]byte(routerInfo), &routerList)
-	return routerList, err
+	if err := json.Unmarshal([]byte(routerInfo), &routerList); err != nil {
+		panic(errors.WithStack(err))
+	}
+
+	return routerList
 }
 
-func (This *Model) UpdateGroupRouter(gid int64, routerList []RouteInfo) (err error) {
+func (This *Model) UpdateGroupRouter(gid int64, routerList []RouteInfo) {
 
 	routers, _ := json.Marshal(routerList)
 
 	sql := "UPDATE gva.t_groups SET router_list = ? WHERE gid = ?"
-	_, err = This.db.Exec(sql, routers, gid)
-
-	return err
+	_, err := This.db.Exec(sql, routers, gid)
+	if err != nil {
+		panic(errors.Wrap(err, "更新分组路由权限失败"))
+	}
 }
 
-func (This *Model) UpdateGroupInfo(auth TGroups) (err error) {
+func (This *Model) UpdateGroupInfo(auth TGroups) {
+
 	sql := "UPDATE gva.t_groups SET gname = ?,parent_gid = ?,router_list = ? WHERE gid = ?"
-	_, err = This.db.Exec(sql, auth.Gname, auth.ParentGid, auth.RouterList, auth.Gid)
-
-	return err
+	if _, err := This.db.Exec(sql, auth.Gname, auth.ParentGid, auth.RouterList, auth.Gid); err != nil {
+		panic(errors.Wrap(err, "更新分组信息失败"))
+	}
 }
 
-func (This *Model) CreateNewGroup(auth TGroups) (err error) {
+func (This *Model) CreateNewGroup(auth TGroups) {
 	sql := `insert into gva.t_groups (gname, parent_gid, router_list, create_time, update_time)
 values (:gname, :parent_gid, :router_list, :create_time, :update_time)`
 
-	_, err = This.db.NamedExec(sql, auth)
-	return err
+	if _, err := This.db.NamedExec(sql, auth); err != nil {
+		panic(errors.Wrap(err, "创建新分组失败"))
+	}
 }
 
-func (This *Model) DeleteOneGroup(gid int64) (err error) {
+func (This *Model) DeleteOneGroup(gid int64) {
 	sql := `DELETE FROM gva.t_groups WHERE gid = ?`
-	_, err = This.db.Exec(sql, gid)
-	return err
+	if _, err := This.db.Exec(sql, gid); err != nil {
+		panic(errors.Wrap(err, "删除分组失败"))
+	}
 }

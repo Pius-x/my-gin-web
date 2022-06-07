@@ -11,6 +11,6 @@ var (
 	AuthorityVerify          = Rules{"Gid": {NotEmpty()}, "Gname": {NotEmpty()}}
 	UpdateGroupRouterVerify  = Rules{"Gid": {NotEmpty()}, "RouterList": {NotEmpty()}}
 	AuthorityIdVerify        = Rules{"Gid": {NotEmpty()}}
-	ChangePasswordVerify     = Rules{"Username": {NotEmpty()}, "Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
+	ChangePasswordVerify     = Rules{"Id": {NotEmpty()}, "Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
 	UpdateHeadPicVerify      = Rules{"Id": {NotEmpty()}, "HeadPic": {NotEmpty()}}
 )

@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"github.com/my-gin-web/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,7 +45,7 @@ func Routers() *gin.Engine {
 	}
 
 	PrivateGroup := Router.Group("")
-	//PrivateGroup.Use(middleware.InterceptHandler())
+	PrivateGroup.Use(middleware.InterceptHandler())
 	{
 		routerGroup.InitUserRouter(PrivateGroup)               // 注册用户路由
 		routerGroup.InitAuthorityRouter(PrivateGroup)          // 注册角色路由

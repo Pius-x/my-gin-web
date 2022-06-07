@@ -9,10 +9,10 @@ type PageInfo struct {
 
 // UserList Paging common input parameter structure
 type UserList struct {
-	Page     int64  `json:"page" form:"page"`         // 页码
-	PageSize int64  `json:"pageSize" form:"pageSize"` // 每页大小
-	Gid      int64  `json:"gid" form:"gid"`           // 分组id
-	Keyword  string `json:"keyword" form:"keyword"`   //关键字
+	Page     int64  `form:"page"`     // 页码
+	PageSize int64  `form:"pageSize"` // 每页大小
+	Gid      int64  `form:"gid"`      // 分组id
+	Keyword  string `form:"keyword"`  // 关键字
 }
 
 // UserListByGid Paging common input parameter structure

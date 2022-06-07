@@ -1,7 +1,9 @@
 package utils
 
 import (
-	"errors"
+	"github.com/gin-gonic/gin"
+	"github.com/my-gin-web/model/common/response"
+	"github.com/pkg/errors"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -107,14 +109,25 @@ func Gt(mark string) string {
 	return "gt=" + mark
 }
 
-//
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: Verify
-//@description: 校验方法
-//@param: st interface{}, roleMap Rules(入参实例，规则map)
-//@return: err error
+// Verify 校验参数 校验失败就直接返回
+func Verify(st interface{}, roleMap Rules, c *gin.Context) {
 
-func Verify(st interface{}, roleMap Rules) (err error) {
+	if err := c.ShouldBind(st); err != nil {
+		panic(errors.Wrap(err, "请求参数结构体接收失败"))
+	}
+
+	if err := verify(reflect.ValueOf(st).Elem().Interface(), roleMap); err != nil {
+		ZapErrorLog(err)
+		response.FailWithMessage(err.Error(), c)
+	}
+}
+
+// verify 校验方法
+func verify(st interface{}, roleMap Rules) (err error) {
+	if len(roleMap) == 0 {
+		return nil
+	}
+
 	compareMap := map[string]bool{
 		"lt": true,
 		"le": true,
@@ -131,26 +144,36 @@ func Verify(st interface{}, roleMap Rules) (err error) {
 	if kd != reflect.Struct {
 		return errors.New("expect struct")
 	}
-	num := val.NumField()
-	// 遍历结构体的所有字段
-	for i := 0; i < num; i++ {
-		tagVal := typ.Field(i)
-		val := val.Field(i)
-		if len(roleMap[tagVal.Name]) > 0 {
-			for _, v := range roleMap[tagVal.Name] {
-				switch {
-				case v == "notEmpty":
-					if isBlank(val) {
-						return errors.New(tagVal.Name + "值不能为空")
-					}
-				case strings.Split(v, "=")[0] == "regexp":
-					if !regexpMatch(strings.Split(v, "=")[1], val.String()) {
-						return errors.New(tagVal.Name + "格式校验不通过")
-					}
-				case compareMap[strings.Split(v, "=")[0]]:
-					if !compareVerify(val, v) {
-						return errors.New(tagVal.Name + "长度或值不在合法范围," + v)
-					}
+
+	// 遍历结构体的所有字段 构成map
+	var structMap = map[string]reflect.Value{}
+	for i := 0; i < val.NumField(); i++ {
+		structMap[typ.Field(i).Name] = val.Field(i)
+	}
+
+	for filedName, ruleList := range roleMap {
+		if len(ruleList) <= 0 {
+			continue
+		}
+
+		oneV, OK := structMap[filedName]
+		if !OK {
+			return errors.New(filedName + "字段不存在")
+		}
+
+		for _, v := range ruleList {
+			switch {
+			case v == "notEmpty":
+				if isBlank(oneV) {
+					return errors.New(filedName + "值不能为空")
+				}
+			case strings.Split(v, "=")[0] == "regexp":
+				if !regexpMatch(strings.Split(v, "=")[1], oneV.String()) {
+					return errors.New(filedName + "格式校验不通过")
+				}
+			case compareMap[strings.Split(v, "=")[0]]:
+				if !compareVerify(oneV, v) {
+					return errors.New(filedName + "长度或值不在合法范围," + v)
 				}
 			}
 		}
@@ -158,12 +181,7 @@ func Verify(st interface{}, roleMap Rules) (err error) {
 	return nil
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: compareVerify
-//@description: 长度和数字的校验方法 根据类型自动校验
-//@param: value reflect.Value, VerifyStr string
-//@return: bool
-
+// compareVerify 长度和数字的校验方法 根据类型自动校验
 func compareVerify(value reflect.Value, VerifyStr string) bool {
 	switch value.Kind() {
 	case reflect.String, reflect.Slice, reflect.Array:
@@ -179,12 +197,7 @@ func compareVerify(value reflect.Value, VerifyStr string) bool {
 	}
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: isBlank
-//@description: 非空校验
-//@param: value reflect.Value
-//@return: bool
-
+// isBlank 非空校验
 func isBlank(value reflect.Value) bool {
 	switch value.Kind() {
 	case reflect.String:
@@ -203,12 +216,7 @@ func isBlank(value reflect.Value) bool {
 	return reflect.DeepEqual(value.Interface(), reflect.Zero(value.Type()).Interface())
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: compare
-//@description: 比较函数
-//@param: value interface{}, VerifyStr string
-//@return: bool
-
+// compare 比较函数
 func compare(value interface{}, VerifyStr string) bool {
 	VerifyStrArr := strings.Split(VerifyStr, "=")
 	val := reflect.ValueOf(value)

@@ -2,10 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/my-gin-web/global"
 	"github.com/my-gin-web/model/common/response"
 	"github.com/my-gin-web/model/operationlog"
-	"go.uber.org/zap"
+	"github.com/my-gin-web/utils"
 )
 
 type OperationRecordApi struct{}
@@ -13,14 +12,12 @@ type OperationRecordApi struct{}
 // GetSysOperationRecordList 分页获取操作记录列表
 func (s *OperationRecordApi) GetSysOperationRecordList(c *gin.Context) {
 	var pageInfo operationlog.SysOperationRecordSearch
-	_ = c.ShouldBindQuery(&pageInfo)
-	if list, total, err := OperationRecordService.GetSysOperationRecordInfoList(pageInfo); err != nil {
-		global.ZapLog.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
-	} else {
-		response.OkWithDetailed(response.PageResult{
-			List:  list,
-			Total: total,
-		}, "获取成功", c)
-	}
+	utils.Verify(&pageInfo, utils.Rules{}, c)
+
+	list, total := OperationRecordService.GetSysOperationRecordInfoList(pageInfo)
+
+	response.OkWithDetailed(response.PageResult{
+		List:  list,
+		Total: total,
+	}, "获取成功", c)
 }

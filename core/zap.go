@@ -39,10 +39,14 @@ func Zap() {
 		getEncoderCore(fmt.Sprintf("./%s/server_warn.log", global.Config.Zap.Director), warnPriority),
 		getEncoderCore(fmt.Sprintf("./%s/server_error.log", global.Config.Zap.Director), errorPriority),
 	}
-	logger = zap.New(zapcore.NewTee(cores[:]...), zap.AddCaller())
+	logger = zap.New(zapcore.NewTee(cores[:]...))
 
 	if global.Config.Zap.ShowLine {
 		logger = logger.WithOptions(zap.AddCaller())
+	}
+
+	if global.Config.Zap.ShowStacktrace {
+		logger = logger.WithOptions(zap.AddStacktrace(zap.WarnLevel))
 	}
 
 	// 替换日志环境变量
@@ -50,6 +54,23 @@ func Zap() {
 
 	// 注入全局变量中
 	global.ZapLog = logger
+
+	logger = logger.WithOptions(zap.AddCallerSkip(1))
+	global.ZapCallerLog = logger
+}
+
+// getEncoderCore 获取Encoder的zapcore.Core
+func getEncoderCore(fileName string, level zapcore.LevelEnabler) (core zapcore.Core) {
+	writer := utils.GetWriteSyncer(fileName) // 使用file-rotatelogs进行日志分割
+	return zapcore.NewCore(getEncoder(), writer, level)
+}
+
+// getEncoder 获取zapcore.Encoder
+func getEncoder() zapcore.Encoder {
+	if global.Config.Zap.Format == "json" {
+		return zapcore.NewJSONEncoder(getEncoderConfig())
+	}
+	return zapcore.NewConsoleEncoder(getEncoderConfig())
 }
 
 // getEncoderConfig 获取zapcore.EncoderConfig
@@ -60,7 +81,7 @@ func getEncoderConfig() (config zapcore.EncoderConfig) {
 		TimeKey:        "time",
 		NameKey:        "logger",
 		CallerKey:      "caller",
-		StacktraceKey:  global.Config.Zap.StacktraceKey,
+		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.LowercaseLevelEncoder,
 		EncodeTime:     CustomTimeEncoder,
@@ -80,20 +101,6 @@ func getEncoderConfig() (config zapcore.EncoderConfig) {
 		config.EncodeLevel = zapcore.LowercaseLevelEncoder
 	}
 	return config
-}
-
-// getEncoder 获取zapcore.Encoder
-func getEncoder() zapcore.Encoder {
-	if global.Config.Zap.Format == "json" {
-		return zapcore.NewJSONEncoder(getEncoderConfig())
-	}
-	return zapcore.NewConsoleEncoder(getEncoderConfig())
-}
-
-// getEncoderCore 获取Encoder的zapcore.Core
-func getEncoderCore(fileName string, level zapcore.LevelEnabler) (core zapcore.Core) {
-	writer := utils.GetWriteSyncer(fileName) // 使用file-rotatelogs进行日志分割
-	return zapcore.NewCore(getEncoder(), writer, level)
 }
 
 // CustomTimeEncoder 自定义日志输出时间格式

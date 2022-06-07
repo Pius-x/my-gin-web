@@ -3,30 +3,34 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/my-gin-web/model/common/response"
 	"github.com/my-gin-web/utils"
 )
 
 // InterceptHandler 拦截器
 func InterceptHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		waitUse, _ := utils.GetClaims(c)
+		if _, err := utils.GetClaims(c); err != nil {
+			response.TokenFailMessage(err.Error(), c)
+			c.Abort()
+			return
+		}
+
+		// Panic 处理
+		defer func() {
+			if r := recover(); r != nil {
+				var msg = fmt.Sprintf("Panic: %+v", r)
+				utils.ZapErrorLog(msg)
+
+				switch r.(type) {
+				case error:
+					response.FailWithMessage(r.(error).Error(), c)
+				default:
+					response.FailWithMessage(msg, c)
+				}
+			}
+		}()
+
 		c.Next()
-		fmt.Printf("%+v \n", waitUse)
-		//// 获取请求的PATH
-		//obj := c.Request.URL.Path
-		//// 获取请求方法
-		//act := c.Request.Method
-		//// 获取用户的角色
-		//sub := waitUse.AuthorityId
-		//e := casbinService.Casbin()
-		//// 判断策略中是否存在
-		//success, _ := e.Enforce(sub, obj, act)
-		//if global.GVA_CONFIG.System.Env == "develop" || success {
-		//	c.Next()
-		//} else {
-		//	response.FailWithDetailed(gin.H{}, "权限不足", c)
-		//	c.Abort()
-		//	return
-		//}
 	}
 }

@@ -104,6 +104,6 @@ zap:
   prefix: '[Zap Log] '
   director: log
   show-line: true
-  encode-level: LowercaseColorLevelEncoder
-  stacktrace-key: stacktrace
+  encode-level: CapitalColorLevelEncoder
+  show-stacktrace: false
   log-in-console: true

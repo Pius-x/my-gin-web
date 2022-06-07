@@ -1,14 +1,12 @@
 package service
 
 import (
-	"errors"
-	"github.com/my-gin-web/global"
 	"github.com/my-gin-web/model/common/request"
 	systemReq "github.com/my-gin-web/model/system/request"
 	systemRes "github.com/my-gin-web/model/system/response"
 	"github.com/my-gin-web/model/user"
 	"github.com/my-gin-web/utils"
-	"go.uber.org/zap"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -46,23 +44,19 @@ func (This *UserService) CreateUserInfo(r systemReq.CreateUserInfo) (err error) 
 		return errors.New("手机号码已注册")
 	}
 
-	err = userModel.InsertNewUser(createInfo)
+	userModel.InsertNewUser(createInfo)
 	return err
 }
 
 // MultiUpdateUserGid 批量更新用户GID
-func (This *UserService) MultiUpdateUserGid(userInfo systemReq.MultiUpdateUserGid) (err error) {
+func (This *UserService) MultiUpdateUserGid(userInfo systemReq.MultiUpdateUserGid) {
 	for _, item := range userInfo.UserGidList {
-		if err = userModel.UpdateUserGid(item.Id, item.Gid); err != nil {
-			return errors.New("批量更新失败")
-		}
+		userModel.UpdateUserGid(item.Id, item.Gid)
 	}
-
-	return err
 }
 
 // UpdateUserInfo 更新用户信息
-func (This *UserService) UpdateUserInfo(r systemReq.UpdateUserInfo) error {
+func (This *UserService) UpdateUserInfo(r systemReq.UpdateUserInfo) {
 	updateInfo := map[string]interface{}{
 		"id":     r.Id,
 		"gid":    r.Gid,
@@ -70,14 +64,10 @@ func (This *UserService) UpdateUserInfo(r systemReq.UpdateUserInfo) error {
 		"mobile": r.Mobile,
 	}
 
-	return userModel.UpdateUserInfo(updateInfo)
+	userModel.UpdateUserInfo(updateInfo)
 }
 
-//@function: ChangePassword
-//@description: 修改用户密码
-//@param: u *model.SysUser, newPassword string
-//@return: err error, userInter *model.SysUser
-
+// ChangePassword 修改密码
 func (This *UserService) ChangePassword(u systemReq.ChangePasswordStruct) (err error) {
 
 	var oldPwd = userModel.GetUserPwd(u.Id)
@@ -85,26 +75,19 @@ func (This *UserService) ChangePassword(u systemReq.ChangePasswordStruct) (err e
 		return errors.New("原密码错误")
 	}
 
-	return userModel.UpdateUserPwd(u.Id, utils.BcryptHash(u.NewPassword))
+	userModel.UpdateUserPwd(u.Id, utils.BcryptHash(u.NewPassword))
+
+	return nil
 }
 
-//@function: UpdateHeadPic
-//@description: 更新头像
-//@param: u *model.SysUser, newPassword string
-//@return: err error, userInter *model.SysUser
+// UpdateHeadPic 更新用户头像
+func (This *UserService) UpdateHeadPic(u systemReq.UpdateHeadPicStruct) {
 
-func (This *UserService) UpdateHeadPic(u systemReq.UpdateHeadPicStruct) (err error) {
-
-	return userModel.UpdateUserHeadPic(u.Id, u.HeadPic)
+	userModel.UpdateUserHeadPic(u.Id, u.HeadPic)
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: GetUserInfoList
-//@description: 分页获取数据
-//@param: info request.PageInfo
-//@return: err error, list interface{}, total int64
-
-func (This *UserService) GetUserInfoList(info request.UserList) (err error, list []systemRes.UserListResponse, total int64) {
+// GetUserInfoList 分页获取用户列表
+func (This *UserService) GetUserInfoList(info request.UserList) (list []systemRes.UserListResponse, total int64) {
 	limit := int64(10)
 	offset := int64(0)
 	if info.Keyword == "" {
@@ -119,15 +102,9 @@ func (This *UserService) GetUserInfoList(info request.UserList) (err error, list
 	var userList []systemRes.UserListResponse
 
 	if info.Keyword == "" {
-		if err = userModel.GetPageUserInfo(&tUsers, &total, gidList, limit, offset); err != nil {
-			global.ZapLog.Error("get page user info err", zap.Error(err))
-			return err, nil, 0
-		}
+		userModel.GetPageUserInfo(&tUsers, &total, gidList, limit, offset)
 	} else {
-		if err = userModel.GetPageUserInfoByKey(&tUsers, &total, gidList, info.Keyword, limit, offset); err != nil {
-			global.ZapLog.Error("get page user info by key err", zap.Error(err))
-			return err, nil, 0
-		}
+		userModel.GetPageUserInfoByKey(&tUsers, &total, gidList, info.Keyword, limit, offset)
 	}
 
 	for _, oneUser := range tUsers {
@@ -142,15 +119,12 @@ func (This *UserService) GetUserInfoList(info request.UserList) (err error, list
 		userList = append(userList, oneUserInfo)
 	}
 
-	return err, userList, total
+	return userList, total
 }
 
 // GetUserListByGid 通过gid获取用户列表
-func (This *UserService) GetUserListByGid(info request.UserListByGid) (list []systemRes.UserListResponse, total int64, err error) {
-	tUsers, total, err := userModel.GetUserListByGid(info.Gid)
-	if err != nil {
-		return nil, 0, err
-	}
+func (This *UserService) GetUserListByGid(info request.UserListByGid) (list []systemRes.UserListResponse, total int64) {
+	tUsers, total := userModel.GetUserListByGid(info.Gid)
 
 	for _, oneUser := range tUsers {
 		var oneUserInfo systemRes.UserListResponse
@@ -164,18 +138,17 @@ func (This *UserService) GetUserListByGid(info request.UserListByGid) (list []sy
 		list = append(list, oneUserInfo)
 	}
 
-	return list, total, err
+	return list, total
 }
 
 // DeleteUser 删除用户
-func (This *UserService) DeleteUser(id int64) (err error) {
+func (This *UserService) DeleteUser(id int64) {
 
-	return userModel.DeleteUser(id)
+	userModel.DeleteUser(id)
 }
 
 // ResetPassword 修改用户密码
-func (This *UserService) ResetPassword(id int64) (err error) {
+func (This *UserService) ResetPassword(id int64) {
 
-	var pwd = "123456"
-	return userModel.UpdateUserPwd(id, pwd)
+	userModel.UpdateUserPwd(id, "123456")
 }

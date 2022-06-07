@@ -3,10 +3,9 @@ package user
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"github.com/my-gin-web/global"
 	systemReq "github.com/my-gin-web/model/system/request"
 	"github.com/my-gin-web/utils/dbInstance"
-	"go.uber.org/zap"
+	"github.com/pkg/errors"
 	"strings"
 	"time"
 )
@@ -26,84 +25,89 @@ func (This *Model) GetOneUserInfo(userInfo *TUsers, condition systemReq.Login) e
 	return This.db.Get(userInfo, sql, condition.Username, condition.Username)
 }
 
-func (This *Model) UpdateLastLoginTime(account string) error {
-	var sql = "UPDATE gva.t_users set last_login_time = ? where account = ?"
-	_, err := This.db.Exec(sql, time.Now().Unix(), account)
-
-	return err
+func (This *Model) UpdateLastLoginTime(id int64) {
+	var sql = "UPDATE gva.t_users set last_login_time = ? where id = ?"
+	if _, err := This.db.Exec(sql, time.Now().Unix(), id); err != nil {
+		panic(errors.Wrap(err, "更新最后登录时间失败"))
+	}
 }
 
-func (This *Model) GetPageUserInfo(userList *[]TUsers, total *int64, gidList []string, limit int64, offset int64) (err error) {
+func (This *Model) GetPageUserInfo(userList *[]TUsers, total *int64, gidList []string, limit int64, offset int64) {
+
 	var sql = "SELECT COUNT(1) FROM gva.t_users WHERE gid IN (?)"
 	sql, args, _ := sqlx.In(sql, gidList)
 
-	err = This.db.Get(total, sql, args...)
-	if err != nil {
-		global.ZapLog.Error("", zap.Error(err))
-		return err
+	if err := This.db.Get(total, sql, args...); err != nil {
+		panic(errors.Wrap(err, "列表条数获取失败"))
 	}
 
 	sql = "SELECT * FROM gva.t_users WHERE gid IN (?) LIMIT ? OFFSET ?"
 	sql, args, _ = sqlx.In(sql, gidList, limit, offset)
 
-	err = This.db.Select(userList, sql, args...)
-
-	return err
+	if err := This.db.Select(userList, sql, args...); err != nil {
+		panic(errors.Wrap(err, "用户列表获取失败"))
+	}
 }
 
-func (This *Model) GetPageUserInfoByKey(userList *[]TUsers, total *int64, gidList []string, key string, limit, offset int64) (err error) {
+func (This *Model) GetPageUserInfoByKey(userList *[]TUsers, total *int64, gidList []string, key string, limit, offset int64) {
 
 	key = fmt.Sprintf("%%%s%%", strings.TrimSpace(key))
 
 	var sql = "SELECT COUNT(1) FROM gva.t_users WHERE gid IN (?) AND (account LIKE ? OR mobile LIKE ?)"
 	sql, args, _ := sqlx.In(sql, gidList, key, key)
-	err = This.db.Get(total, sql, args...)
+	if err := This.db.Get(total, sql, args...); err != nil {
+		panic(errors.Wrap(err, "列表条数获取失败"))
+	}
 
 	sql = "SELECT * FROM gva.t_users WHERE gid IN (?) AND (account LIKE ? OR mobile LIKE ?) LIMIT ? OFFSET ?"
 	sql, args, _ = sqlx.In(sql, gidList, key, key, limit, offset)
-	err = This.db.Select(userList, sql, args...)
 
-	return err
+	if err := This.db.Select(userList, sql, args...); err != nil {
+		panic(errors.Wrap(err, "用户列表获取失败"))
+	}
 }
 
-func (This *Model) UpdateUserInfo(updateInfo map[string]interface{}) (err error) {
+func (This *Model) UpdateUserInfo(updateInfo map[string]interface{}) {
 	sql := "UPDATE gva.t_users set gid = :gid ,`name` = :name ,mobile = :mobile WHERE id = :id"
-	_, err = This.db.NamedExec(sql, updateInfo)
-	return err
+	if _, err := This.db.NamedExec(sql, updateInfo); err != nil {
+		panic(errors.Wrap(err, "更新用户信息失败"))
+	}
 }
 
-func (This *Model) GetUserListByGid(gid int64) (tUsers []TUsers, total int64, err error) {
+func (This *Model) GetUserListByGid(gid int64) (tUsers []TUsers, total int64) {
 	sql := "SELECT COUNT(1) FROM gva.t_users WHERE gid = ?"
-	if err = This.db.Get(&total, sql, gid); err != nil {
-		global.ZapLog.Error("err", zap.Error(err))
-		return nil, 0, err
+	if err := This.db.Get(&total, sql, gid); err != nil {
+		panic(errors.Wrap(err, "列表条数获取失败"))
 	}
 
 	sql = "SELECT * FROM gva.t_users WHERE gid = ?"
-	if err = This.db.Select(&tUsers, sql, gid); err != nil {
-		global.ZapLog.Error("err", zap.Error(err))
-		return nil, 0, err
+	if err := This.db.Select(&tUsers, sql, gid); err != nil {
+		panic(errors.Wrap(err, "用户列表获取失败"))
 	}
 
-	return tUsers, total, err
+	return tUsers, total
 }
 
-func (This *Model) UpdateUserGid(id int64, gid int64) (err error) {
+func (This *Model) UpdateUserGid(id int64, gid int64) {
 	sql := "UPDATE gva.t_users set gid = ? WHERE id = ?"
-	_, err = This.db.Exec(sql, gid, id)
-	return err
+	if _, err := This.db.Exec(sql, gid, id); err != nil {
+		panic(errors.Wrap(err, "更新用户分组Id失败"))
+	}
 }
 
-func (This *Model) DeleteUser(id int64) (err error) {
+func (This *Model) DeleteUser(id int64) {
 	sql := "DELETE FROM gva.t_users WHERE id = ?"
-	_, err = This.db.Exec(sql, id)
-	return err
+
+	if _, err := This.db.Exec(sql, id); err != nil {
+		panic(errors.Wrap(err, "删除用户失败"))
+	}
 }
 
-func (This *Model) UpdateUserPwd(id int64, pwd string) (err error) {
+func (This *Model) UpdateUserPwd(id int64, pwd string) {
 	sql := "UPDATE gva.t_users set password = ? WHERE id = ?"
-	_, err = This.db.Exec(sql, pwd, id)
-	return err
+	if _, err := This.db.Exec(sql, pwd, id); err != nil {
+		panic(errors.Wrap(err, "更新密码失败"))
+	}
 }
 
 func (This *Model) GetUserCountByAccount(account string) (total int64) {
@@ -122,13 +126,14 @@ func (This *Model) GetUserCountByMobile(mobile string) (total int64) {
 	return total
 }
 
-func (This *Model) InsertNewUser(user TUsers) (err error) {
+func (This *Model) InsertNewUser(user TUsers) {
 	var sql = `INSERT INTO gva.t_users (account, password, gid, name, head_pic, mobile, create_time, update_time, last_login_time,
                          create_by)
 VALUES (:account, :password, :gid, :name, :head_pic, :mobile, :create_time, :update_time, :last_login_time, :create_by)`
-	_, err = This.db.NamedExec(sql, user)
 
-	return err
+	if _, err := This.db.NamedExec(sql, user); err != nil {
+		panic(errors.Wrap(err, "新增用户失败"))
+	}
 }
 
 func (This *Model) GetUserPwd(id int64) (pwd string) {
@@ -140,8 +145,10 @@ func (This *Model) GetUserPwd(id int64) (pwd string) {
 	return pwd
 }
 
-func (This *Model) UpdateUserHeadPic(id int64, pic int64) (err error) {
+func (This *Model) UpdateUserHeadPic(id int64, pic int64) {
 	sql := "UPDATE gva.t_users set head_pic = ? WHERE id = ?"
-	_, err = This.db.Exec(sql, pic, id)
-	return err
+
+	if _, err := This.db.Exec(sql, pic, id); err != nil {
+		panic(errors.Wrap(err, "更新头像失败"))
+	}
 }
