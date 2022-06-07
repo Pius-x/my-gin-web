@@ -45,10 +45,6 @@ func Zap() {
 		logger = logger.WithOptions(zap.AddCaller())
 	}
 
-	if global.Config.Zap.ShowStacktrace {
-		logger = logger.WithOptions(zap.AddStacktrace(zap.WarnLevel))
-	}
-
 	// 替换日志环境变量
 	zap.ReplaceGlobals(logger)
 
@@ -81,7 +77,7 @@ func getEncoderConfig() (config zapcore.EncoderConfig) {
 		TimeKey:        "time",
 		NameKey:        "logger",
 		CallerKey:      "caller",
-		StacktraceKey:  "stacktrace",
+		StacktraceKey:  global.Config.Zap.StacktraceKey,
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.LowercaseLevelEncoder,
 		EncodeTime:     CustomTimeEncoder,

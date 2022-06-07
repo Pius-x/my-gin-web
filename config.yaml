@@ -105,5 +105,5 @@ zap:
   director: log
   show-line: true
   encode-level: CapitalColorLevelEncoder
-  show-stacktrace: false
+  stacktrace-key: stacktrace
   log-in-console: true
