@@ -34,7 +34,7 @@ func DefaultRegisteredMsgHandler(admin biz.IManage, logger *zap.Logger) map[int3
 
 func DefaultCheckMap() map[string]biz.CheckFunc {
 	return map[string]biz.CheckFunc{
-		"gva_ws": func(c interface{}) (string, bool) {
+		"gva_ws": func(c any) (string, bool) {
 			// 先断言是gin.content
 			cc, ok := c.(*gin.Context)
 			if !ok {

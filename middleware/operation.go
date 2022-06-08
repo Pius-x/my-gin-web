@@ -18,7 +18,7 @@ import (
 var respPool sync.Pool
 
 func init() {
-	respPool.New = func() interface{} {
+	respPool.New = func() any {
 		return make([]byte, 1024)
 	}
 }

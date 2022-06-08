@@ -67,7 +67,7 @@ func (This *Model) GetPageUserInfoByKey(userList *[]TUsers, total *int64, gidLis
 	}
 }
 
-func (This *Model) UpdateUserInfo(updateInfo map[string]interface{}) {
+func (This *Model) UpdateUserInfo(updateInfo map[string]any) {
 	sql := "UPDATE gva.t_users set gid = :gid ,`name` = :name ,mobile = :mobile WHERE id = :id"
 	if _, err := This.db.NamedExec(sql, updateInfo); err != nil {
 		panic(errors.Wrap(err, "更新用户信息失败"))

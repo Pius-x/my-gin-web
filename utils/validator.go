@@ -110,7 +110,7 @@ func Gt(mark string) string {
 }
 
 // Verify 校验参数 校验失败就直接返回
-func Verify(st interface{}, roleMap Rules, c *gin.Context) {
+func Verify(st any, roleMap Rules, c *gin.Context) {
 
 	if err := c.ShouldBind(st); err != nil {
 		panic(errors.Wrap(err, "请求参数结构体接收失败"))
@@ -123,7 +123,7 @@ func Verify(st interface{}, roleMap Rules, c *gin.Context) {
 }
 
 // verify 校验方法
-func verify(st interface{}, roleMap Rules) (err error) {
+func verify(st any, roleMap Rules) (err error) {
 	if len(roleMap) == 0 {
 		return nil
 	}
@@ -217,7 +217,7 @@ func isBlank(value reflect.Value) bool {
 }
 
 // compare 比较函数
-func compare(value interface{}, VerifyStr string) bool {
+func compare(value any, VerifyStr string) bool {
 	VerifyStrArr := strings.Split(VerifyStr, "=")
 	val := reflect.ValueOf(value)
 	switch val.Kind() {

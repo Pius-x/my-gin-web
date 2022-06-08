@@ -2,46 +2,82 @@ package main_test
 
 import (
 	"fmt"
-	"github.com/my-gin-web/core"
-	"github.com/my-gin-web/global"
-	"github.com/pkg/errors"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"testing"
 )
 
 func TestGo(t *testing.T) {
-	core.Viper() // 初始化Viper配置库
-	core.Zap()   // 初始化zap日志库
-	_, err := ReadConfig()
-	if err != nil {
-		//fmt.Printf("original err:%T %v\n", errors.Cause(err), errors.Cause(err))
-		//fmt.Printf("stack trace:\n %+v\n", err) // %+v 可以在打印的时候打印完整的堆栈信息
-
-		global.ZapLog.Error(fmt.Sprintf("err err:%v\n", err.Error()))
-		global.ZapLog.Error(fmt.Sprintf("original err:%v\n", errors.Cause(err)))
-		global.ZapLog.Error(fmt.Sprintf("original err:%s \n", err))
-		global.ZapLog.Error(fmt.Sprintf("stack trace:\n %+v\n", err))
-		os.Exit(1)
-	}
+	main()
 }
 
-func ReadFile(path string) ([]byte, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, errors.Wrap(err, "open failed")
+func main() {
+	// Initialize a map for the integer values
+	ints := map[string]int64{
+		"first":  34,
+		"second": 12,
 	}
-	defer f.Close()
-	buf, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, errors.Wrap(err, "read failed")
+
+	// Initialize a map for the float values
+	floats := map[string]float64{
+		"first":  35.98,
+		"second": 26.99,
 	}
-	return buf, nil
+
+	fmt.Printf("Non-Generic Sums: %v and %v\n",
+		SumInts(ints),
+		SumFloats(floats))
+
+	fmt.Printf("Generic Sums: %v and %v\n",
+		SumIntsOrFloats[string, int64](ints),
+		SumIntsOrFloats[string, float64](floats))
+
+	fmt.Printf("Generic Sums, type parameters inferred: %v and %v\n",
+		SumIntsOrFloats(ints),
+		SumIntsOrFloats(floats))
+	
+	fmt.Printf("Generic Sums with Constraint: %v and %v\n",
+		SumNumbers(ints),
+		SumNumbers(floats))
+
 }
 
-func ReadConfig() ([]byte, error) {
-	home := os.Getenv("HOME")
-	config, err := ReadFile(filepath.Join(home, ".settings.xml"))
-	return config, errors.WithMessage(err, "cound not read config")
+// SumInts adds together the values of m.
+func SumInts(m map[string]int64) int64 {
+	var s int64
+	for _, v := range m {
+		s += v
+	}
+	return s
+}
+
+// SumFloats adds together the values of m.
+func SumFloats(m map[string]float64) float64 {
+	var s float64
+	for _, v := range m {
+		s += v
+	}
+	return s
+}
+
+// SumIntsOrFloats sums the values of map m. It supports both int64 and float64
+// as types for map values.
+func SumIntsOrFloats[K comparable, V int64 | float64](m map[K]V) V {
+	var s V
+	for _, v := range m {
+		s += v
+	}
+	return s
+}
+
+type Number interface {
+	int64 | float64
+}
+
+// SumNumbers sums the values of map m. It supports both integers
+// and floats as map values.
+func SumNumbers[K comparable, V Number](m map[K]V) V {
+	var s V
+	for _, v := range m {
+		s += v
+	}
+	return s
 }

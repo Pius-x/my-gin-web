@@ -57,7 +57,7 @@ func (This *UserService) MultiUpdateUserGid(userInfo systemReq.MultiUpdateUserGi
 
 // UpdateUserInfo 更新用户信息
 func (This *UserService) UpdateUserInfo(r systemReq.UpdateUserInfo) {
-	updateInfo := map[string]interface{}{
+	updateInfo := map[string]any{
 		"id":     r.Id,
 		"gid":    r.Gid,
 		"name":   r.Name,

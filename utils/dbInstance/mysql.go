@@ -35,7 +35,7 @@ type Db struct {
 	*sqlx.DB
 }
 
-func (db *Db) Insert(dest interface{}) {
+func (db *Db) Insert(dest any) {
 	// 注意：这里必须是params... 不然会转成数组类型了
 	//res, err := db.Exec(query, params...)
 	// 打印上一次插入自增的id
@@ -46,7 +46,7 @@ func (db *Db) Insert(dest interface{}) {
 	//}
 }
 
-func (db *Db) Delete(sql string, params ...interface{}) {
+func (db *Db) Delete(sql string, params ...any) {
 	res, err := db.Exec(sql, params...)
 	if err != nil {
 		fmt.Printf("删除失败：%v\n", err)
@@ -55,7 +55,7 @@ func (db *Db) Delete(sql string, params ...interface{}) {
 	}
 }
 
-func (db *Db) Update(sql string, params ...interface{}) {
+func (db *Db) Update(sql string, params ...any) {
 	res, err := db.Exec(sql, params...)
 	if err != nil {
 		fmt.Printf("更新失败：%v\n", err)
