@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 
 	"github.com/my-gin-web/global"
 	"github.com/my-gin-web/model/example"

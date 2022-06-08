@@ -3,9 +3,9 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/my-gin-web/global"
-	"github.com/my-gin-web/model/common/response"
 	email_response "github.com/my-gin-web/plugin/email/model/response"
 	"github.com/my-gin-web/plugin/email/service"
+	"github.com/my-gin-web/utils/answer"
 	"go.uber.org/zap"
 )
 
@@ -20,9 +20,9 @@ type EmailApi struct{}
 func (s *EmailApi) EmailTest(c *gin.Context) {
 	if err := service.ServiceGroupApp.EmailTest(); err != nil {
 		global.ZapLog.Error("发送失败!", zap.Error(err))
-		response.FailWithMessage("发送失败", c)
+		answer.FailWithMessage("发送失败", c)
 	} else {
-		response.OkWithData("发送成功", c)
+		answer.OkWithMessage("发送成功", c)
 	}
 }
 
@@ -38,8 +38,8 @@ func (s *EmailApi) SendEmail(c *gin.Context) {
 	_ = c.ShouldBindJSON(&email)
 	if err := service.ServiceGroupApp.SendEmail(email.To, email.Subject, email.Body); err != nil {
 		global.ZapLog.Error("发送失败!", zap.Error(err))
-		response.FailWithMessage("发送失败", c)
+		answer.FailWithMessage("发送失败", c)
 	} else {
-		response.OkWithData("发送成功", c)
+		answer.OkWithMessage("发送成功", c)
 	}
 }

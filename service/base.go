@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"github.com/my-gin-web/global"
 	"github.com/my-gin-web/model/group"
-	systemReq "github.com/my-gin-web/model/system/request"
-	systemRes "github.com/my-gin-web/model/system/response"
 	"github.com/my-gin-web/model/user"
 	"github.com/my-gin-web/utils"
 	"github.com/pkg/errors"
@@ -13,17 +11,17 @@ import (
 
 type BaseService struct{}
 
-func (This *BaseService) Login(u systemReq.Login) (err error, response systemRes.LoginResponse) {
+func (This *BaseService) Login(u user.ReqLogin) (err error, res user.ResLogin) {
 
 	// 获取用户个人信息
-	var userInfo user.TUsers
-	if err = userModel.GetOneUserInfo(&userInfo, u); err != nil {
-		return errors.New("账号不存在"), response
+	userInfo, err := userModel.GetOneUserInfo(u)
+	if err != nil {
+		return errors.New("账号不存在"), res
 	}
 
 	// 密码校验
 	if ok := utils.BcryptCheck(u.Password, userInfo.Password); !ok {
-		return errors.New("密码错误"), response
+		return errors.New("密码错误"), res
 	}
 
 	// 登录信息
@@ -32,26 +30,29 @@ func (This *BaseService) Login(u systemReq.Login) (err error, response systemRes
 		RouterList: []group.RouteInfo{},
 	}
 
+	// 解析权限信息
 	var groupInfoString = groupModel.GetRouterList(userInfo.Gid)
-
-	_ = json.Unmarshal([]byte(groupInfoString), &loginInfo.RouterList)
+	if err = json.Unmarshal([]byte(groupInfoString), &loginInfo.RouterList); err != nil {
+		panic(errors.Wrap(err, "权限列表解析失败"))
+	}
 
 	// 更新最后一次登录时间
 	userModel.UpdateLastLoginTime(loginInfo.Id)
 
 	// 登录以后签发jwt
-	response = This.tokenNext(loginInfo)
+	res = This.tokenNext(loginInfo)
 
-	return err, response
+	return err, res
 }
 
 // TokenNext 登录以后签发jwt
-func (This *BaseService) tokenNext(user user.LoginInfo) (response systemRes.LoginResponse) {
+func (This *BaseService) tokenNext(loginInfo user.LoginInfo) (response user.ResLogin) {
+
 	j := &utils.JWT{SigningKey: []byte(global.Config.JWT.SigningKey)} // 唯一签名
-	claims := j.CreateClaims(systemReq.BaseClaims{
-		ID:       user.Id,
-		Account:  user.Account,
-		Password: user.Password,
+	claims := j.CreateClaims(user.BaseClaims{
+		ID:       loginInfo.Id,
+		Account:  loginInfo.Account,
+		Password: loginInfo.Password,
 	})
 
 	token, err := j.CreateToken(claims)
@@ -59,8 +60,8 @@ func (This *BaseService) tokenNext(user user.LoginInfo) (response systemRes.Logi
 		panic(errors.Wrap(err, "获取token失败"))
 	}
 
-	return systemRes.LoginResponse{
-		User:      user,
+	return user.ResLogin{
+		User:      loginInfo,
 		Token:     token,
 		ExpiresAt: claims.StandardClaims.ExpiresAt * 1000,
 	}

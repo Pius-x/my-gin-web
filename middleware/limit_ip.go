@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"context"
-	"errors"
+	"github.com/my-gin-web/utils/answer"
+	"github.com/pkg/errors"
 	"net/http"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/my-gin-web/global"
-	"github.com/my-gin-web/model/common/response"
 )
 
 type LimitConfig struct {
@@ -27,7 +27,7 @@ type LimitConfig struct {
 func (l LimitConfig) LimitWithTime() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if err := l.CheckOrMark(l.GenerationKey(c), l.Expire, l.Limit); err != nil {
-			c.JSON(http.StatusOK, gin.H{"code": response.Error, "msg": err})
+			c.JSON(http.StatusOK, gin.H{"code": answer.Error, "msg": err})
 			c.Abort()
 			return
 		} else {

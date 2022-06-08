@@ -3,7 +3,6 @@ package user
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	systemReq "github.com/my-gin-web/model/system/request"
 	"github.com/my-gin-web/utils/dbInstance"
 	"github.com/pkg/errors"
 	"strings"
@@ -20,9 +19,11 @@ func NewModel() *Model {
 	}
 }
 
-func (This *Model) GetOneUserInfo(userInfo *TUsers, condition systemReq.Login) error {
+func (This *Model) GetOneUserInfo(condition ReqLogin) (userInfo TUsers, err error) {
 	var sql = "Select * From gva.t_users Where `account` = ? Or `mobile` = ? LIMIT 1 "
-	return This.db.Get(userInfo, sql, condition.Username, condition.Username)
+	err = This.db.Get(&userInfo, sql, condition.Username, condition.Username)
+
+	return userInfo, err
 }
 
 func (This *Model) UpdateLastLoginTime(id int64) {

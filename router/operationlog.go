@@ -7,9 +7,9 @@ import (
 
 type OperationLogRouter struct{}
 
-func (s *OperationLogRouter) InitSysOperationRecordRouter(Router *gin.RouterGroup) {
-	operationRecordRouter := Router.Group("sysOperationRecord").Use(middleware.OperationRecord())
+func (s *OperationLogRouter) InitOperationLogRouter(Router *gin.RouterGroup) {
+	operationLogRouter := Router.Group("operationLog").Use(middleware.OperationRecord())
 	{
-		operationRecordRouter.GET("getSysOperationRecordList", OperationRecordApi.GetSysOperationRecordList) // 获取SysOperationRecord列表
+		operationLogRouter.GET("getOperationLogList", OperationRecordApi.GetOperationLogList) // 获取SysOperationRecord列表
 	}
 }

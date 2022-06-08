@@ -3,34 +3,48 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/my-gin-web/model/common/response"
 	"github.com/my-gin-web/utils"
+	"github.com/my-gin-web/utils/answer"
 )
 
-// InterceptHandler 拦截器
-func InterceptHandler() gin.HandlerFunc {
+// InterceptPublic 拦截器
+func InterceptPublic() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Panic 处理
+		defer deferHandler(c)()
+
+		c.Next()
+	}
+}
+
+// InterceptPrivate 拦截器
+func InterceptPrivate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if _, err := utils.GetClaims(c); err != nil {
-			response.TokenFailMessage(err.Error(), c)
+			answer.TokenFailMessage(err.Error(), c)
 			c.Abort()
 			return
 		}
 
 		// Panic 处理
-		defer func() {
-			if r := recover(); r != nil {
-				var msg = fmt.Sprintf("Panic: %+v", r)
-				utils.ZapErrorLog(msg)
-
-				switch r.(type) {
-				case error:
-					response.FailWithMessage(r.(error).Error(), c)
-				default:
-					response.FailWithMessage(msg, c)
-				}
-			}
-		}()
+		defer deferHandler(c)()
 
 		c.Next()
+	}
+}
+
+func deferHandler(c *gin.Context) func() {
+	return func() {
+		if r := recover(); r != nil {
+			var msg = fmt.Sprintf("Panic: %+v", r)
+			utils.ZapErrorLog(msg)
+
+			switch r.(type) {
+			case error:
+				answer.FailWithMessage(r.(error).Error(), c)
+			default:
+				answer.FailWithMessage(msg, c)
+			}
+		}
 	}
 }

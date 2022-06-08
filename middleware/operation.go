@@ -3,7 +3,7 @@ package middleware
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
-	system2 "github.com/my-gin-web/api"
+	"github.com/my-gin-web/api"
 	"github.com/my-gin-web/global"
 	"github.com/my-gin-web/model/operationlog"
 	"github.com/my-gin-web/utils"
@@ -56,7 +56,7 @@ func OperationRecord() gin.HandlerFunc {
 			userAccount = c.Request.Header.Get("x-account")
 		}
 
-		record := operationlog.SysOperationRecord{
+		record := operationlog.TOperationLog{
 			Ip:          c.ClientIP(),
 			Method:      c.Request.Method,
 			Path:        c.Request.URL.Path,
@@ -110,7 +110,7 @@ func OperationRecord() gin.HandlerFunc {
 		}
 
 		// 新增操作记录
-		system2.OperationRecordService.CreateSysOperationRecord(record)
+		api.OperationLogService.CreateOperationLog(record)
 	}
 }
 

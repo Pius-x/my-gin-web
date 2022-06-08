@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/my-gin-web/model/common/response"
+	"github.com/my-gin-web/utils/answer"
 	"github.com/pkg/errors"
 	"reflect"
 	"regexp"
@@ -118,7 +118,7 @@ func Verify(st any, roleMap Rules, c *gin.Context) {
 
 	if err := verify(reflect.ValueOf(st).Elem().Interface(), roleMap); err != nil {
 		ZapErrorLog(err)
-		response.FailWithMessage(err.Error(), c)
+		answer.FailWithMessage(err.Error(), c)
 	}
 }
 
@@ -137,18 +137,11 @@ func verify(st any, roleMap Rules) (err error) {
 		"gt": true,
 	}
 
-	typ := reflect.TypeOf(st)
-	val := reflect.ValueOf(st) // 获取reflect.Type类型
-
-	kd := val.Kind() // 获取到st对应的类别
-	if kd != reflect.Struct {
-		return errors.New("expect struct")
-	}
-
-	// 遍历结构体的所有字段 构成map
 	var structMap = map[string]reflect.Value{}
-	for i := 0; i < val.NumField(); i++ {
-		structMap[typ.Field(i).Name] = val.Field(i)
+
+	// 深度遍历结构体的所有字段 构成map
+	if err = depthStruckToMap(st, structMap); err != nil {
+		return errors.New("expect struct")
 	}
 
 	for filedName, ruleList := range roleMap {
@@ -291,4 +284,26 @@ func compare(value any, VerifyStr string) bool {
 
 func regexpMatch(rule, matchStr string) bool {
 	return regexp.MustCompile(rule).MatchString(matchStr)
+}
+
+func depthStruckToMap(st any, structMap map[string]reflect.Value) error {
+	typ := reflect.TypeOf(st)
+	val := reflect.ValueOf(st) // 获取reflect.Type类型
+
+	kd := val.Kind() // 获取到st对应的类别
+	if kd != reflect.Struct {
+		return errors.New("expect struct")
+	}
+
+	for i := 0; i < val.NumField(); i++ {
+		if val.Field(i).Kind() == reflect.Struct {
+			if err := depthStruckToMap(val.Field(i).Interface(), structMap); err != nil {
+				return err
+			}
+		} else {
+			structMap[typ.Field(i).Name] = val.Field(i)
+		}
+	}
+
+	return nil
 }

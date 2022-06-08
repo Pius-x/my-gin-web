@@ -2,18 +2,16 @@ package api
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/my-gin-web/global"
+	"github.com/my-gin-web/model/example"
+	exampleRes "github.com/my-gin-web/model/example/response"
+	"github.com/my-gin-web/utils"
+	"github.com/my-gin-web/utils/answer"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"mime/multipart"
 	"strconv"
-
-	"github.com/my-gin-web/model/example"
-
-	"github.com/gin-gonic/gin"
-	"github.com/my-gin-web/global"
-	"github.com/my-gin-web/model/common/response"
-	exampleRes "github.com/my-gin-web/model/example/response"
-	"github.com/my-gin-web/utils"
-	"go.uber.org/zap"
 )
 
 // @Tags ExaFileUploadAndDownload
@@ -33,13 +31,13 @@ func (u *FileUploadAndDownloadApi) BreakpointContinue(c *gin.Context) {
 	_, FileHeader, err := c.Request.FormFile("file")
 	if err != nil {
 		global.ZapLog.Error("接收文件失败!", zap.Error(err))
-		response.FailWithMessage("接收文件失败", c)
+		answer.FailWithMessage("接收文件失败", c)
 		return
 	}
 	f, err := FileHeader.Open()
 	if err != nil {
 		global.ZapLog.Error("文件读取失败!", zap.Error(err))
-		response.FailWithMessage("文件读取失败", c)
+		answer.FailWithMessage("文件读取失败", c)
 		return
 	}
 	defer func(f multipart.File) {
@@ -51,28 +49,28 @@ func (u *FileUploadAndDownloadApi) BreakpointContinue(c *gin.Context) {
 	cen, _ := ioutil.ReadAll(f)
 	if !utils.CheckMd5(cen, chunkMd5) {
 		global.ZapLog.Error("检查md5失败!", zap.Error(err))
-		response.FailWithMessage("检查md5失败", c)
+		answer.FailWithMessage("检查md5失败", c)
 		return
 	}
 	err, file := FileUploadAndDownloadService.FindOrCreateFile(fileMd5, fileName, chunkTotal)
 	if err != nil {
 		global.ZapLog.Error("查找或创建记录失败!", zap.Error(err))
-		response.FailWithMessage("查找或创建记录失败", c)
+		answer.FailWithMessage("查找或创建记录失败", c)
 		return
 	}
 	err, pathc := utils.BreakPointContinue(cen, fileName, chunkNumber, chunkTotal, fileMd5)
 	if err != nil {
 		global.ZapLog.Error("断点续传失败!", zap.Error(err))
-		response.FailWithMessage("断点续传失败", c)
+		answer.FailWithMessage("断点续传失败", c)
 		return
 	}
 
 	if err = FileUploadAndDownloadService.CreateFileChunk(file.ID, pathc, chunkNumber); err != nil {
 		global.ZapLog.Error("创建文件记录失败!", zap.Error(err))
-		response.FailWithMessage("创建文件记录失败", c)
+		answer.FailWithMessage("创建文件记录失败", c)
 		return
 	}
-	response.OkWithMessage("切片创建成功", c)
+	answer.OkWithMessage("切片创建成功", c)
 }
 
 // @Tags ExaFileUploadAndDownload
@@ -90,9 +88,9 @@ func (u *FileUploadAndDownloadApi) FindFile(c *gin.Context) {
 	err, file := FileUploadAndDownloadService.FindOrCreateFile(fileMd5, fileName, chunkTotal)
 	if err != nil {
 		global.ZapLog.Error("查找失败!", zap.Error(err))
-		response.FailWithMessage("查找失败", c)
+		answer.FailWithMessage("查找失败", c)
 	} else {
-		response.OkWithDetailed(exampleRes.FileResponse{File: file}, "查找成功", c)
+		answer.OkWithDetailed(exampleRes.FileResponse{File: file}, "查找成功", c)
 	}
 }
 
@@ -110,9 +108,9 @@ func (b *FileUploadAndDownloadApi) BreakpointContinueFinish(c *gin.Context) {
 	err, filePath := utils.MakeFile(fileName, fileMd5)
 	if err != nil {
 		global.ZapLog.Error("文件创建失败!", zap.Error(err))
-		response.FailWithDetailed(exampleRes.FilePathResponse{FilePath: filePath}, "文件创建失败", c)
+		answer.FailWithDetailed(exampleRes.FilePathResponse{FilePath: filePath}, "文件创建失败", c)
 	} else {
-		response.OkWithDetailed(exampleRes.FilePathResponse{FilePath: filePath}, "文件创建成功", c)
+		answer.OkWithDetailed(exampleRes.FilePathResponse{FilePath: filePath}, "文件创建成功", c)
 	}
 }
 
@@ -135,8 +133,8 @@ func (u *FileUploadAndDownloadApi) RemoveChunk(c *gin.Context) {
 	err = FileUploadAndDownloadService.DeleteFileChunk(file.FileMd5, file.FileName, file.FilePath)
 	if err != nil {
 		global.ZapLog.Error(err.Error(), zap.Error(err))
-		response.FailWithMessage(err.Error(), c)
+		answer.FailWithMessage(err.Error(), c)
 	} else {
-		response.OkWithMessage("缓存切片删除成功", c)
+		answer.OkWithMessage("缓存切片删除成功", c)
 	}
 }

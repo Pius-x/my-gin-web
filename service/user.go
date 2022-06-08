@@ -1,9 +1,7 @@
 package service
 
 import (
-	"github.com/my-gin-web/model/common/request"
-	systemReq "github.com/my-gin-web/model/system/request"
-	systemRes "github.com/my-gin-web/model/system/response"
+	"github.com/my-gin-web/model/common"
 	"github.com/my-gin-web/model/user"
 	"github.com/my-gin-web/utils"
 	"github.com/pkg/errors"
@@ -17,7 +15,7 @@ import (
 
 type UserService struct{}
 
-func (This *UserService) CreateUserInfo(r systemReq.CreateUserInfo) (err error) {
+func (This *UserService) CreateUserInfo(r user.CreateUserInfo) (err error) {
 	var curTime = time.Now().Unix()
 
 	createInfo := user.TUsers{
@@ -49,14 +47,14 @@ func (This *UserService) CreateUserInfo(r systemReq.CreateUserInfo) (err error) 
 }
 
 // MultiUpdateUserGid 批量更新用户GID
-func (This *UserService) MultiUpdateUserGid(userInfo systemReq.MultiUpdateUserGid) {
+func (This *UserService) MultiUpdateUserGid(userInfo user.MultiUpdateUserGid) {
 	for _, item := range userInfo.UserGidList {
 		userModel.UpdateUserGid(item.Id, item.Gid)
 	}
 }
 
 // UpdateUserInfo 更新用户信息
-func (This *UserService) UpdateUserInfo(r systemReq.UpdateUserInfo) {
+func (This *UserService) UpdateUserInfo(r user.UpdateUserInfo) {
 	updateInfo := map[string]any{
 		"id":     r.Id,
 		"gid":    r.Gid,
@@ -68,7 +66,7 @@ func (This *UserService) UpdateUserInfo(r systemReq.UpdateUserInfo) {
 }
 
 // ChangePassword 修改密码
-func (This *UserService) ChangePassword(u systemReq.ChangePasswordStruct) (err error) {
+func (This *UserService) ChangePassword(u user.ChangePasswordStruct) (err error) {
 
 	var oldPwd = userModel.GetUserPwd(u.Id)
 	if ok := utils.BcryptCheck(u.Password, oldPwd); !ok {
@@ -81,13 +79,13 @@ func (This *UserService) ChangePassword(u systemReq.ChangePasswordStruct) (err e
 }
 
 // UpdateHeadPic 更新用户头像
-func (This *UserService) UpdateHeadPic(u systemReq.UpdateHeadPicStruct) {
+func (This *UserService) UpdateHeadPic(u user.UpdateHeadPicStruct) {
 
 	userModel.UpdateUserHeadPic(u.Id, u.HeadPic)
 }
 
 // GetUserInfoList 分页获取用户列表
-func (This *UserService) GetUserInfoList(info request.UserList) (list []systemRes.UserListResponse, total int64) {
+func (This *UserService) GetUserInfoList(info user.ReqUserList) (list []user.ResUserList, total int64) {
 	limit := int64(10)
 	offset := int64(0)
 	if info.Keyword == "" {
@@ -99,7 +97,7 @@ func (This *UserService) GetUserInfoList(info request.UserList) (list []systemRe
 	var gidList = groupService.GetChildrenIdListByGid(info.Gid)
 
 	var tUsers []user.TUsers
-	var userList []systemRes.UserListResponse
+	var userList []user.ResUserList
 
 	if info.Keyword == "" {
 		userModel.GetPageUserInfo(&tUsers, &total, gidList, limit, offset)
@@ -108,7 +106,7 @@ func (This *UserService) GetUserInfoList(info request.UserList) (list []systemRe
 	}
 
 	for _, oneUser := range tUsers {
-		var oneUserInfo systemRes.UserListResponse
+		var oneUserInfo user.ResUserList
 		oneUserInfo.Id = oneUser.Id
 		oneUserInfo.Account = oneUser.Account
 		oneUserInfo.Gid = oneUser.Gid
@@ -123,11 +121,11 @@ func (This *UserService) GetUserInfoList(info request.UserList) (list []systemRe
 }
 
 // GetUserListByGid 通过gid获取用户列表
-func (This *UserService) GetUserListByGid(info request.UserListByGid) (list []systemRes.UserListResponse, total int64) {
+func (This *UserService) GetUserListByGid(info common.GetByGid) (list []user.ResUserList, total int64) {
 	tUsers, total := userModel.GetUserListByGid(info.Gid)
 
 	for _, oneUser := range tUsers {
-		var oneUserInfo systemRes.UserListResponse
+		var oneUserInfo user.ResUserList
 		oneUserInfo.Id = oneUser.Id
 		oneUserInfo.Account = oneUser.Account
 		oneUserInfo.Gid = oneUser.Gid

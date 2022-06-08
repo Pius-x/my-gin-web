@@ -1,7 +1,7 @@
 package upload
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"io"
 	"mime/multipart"
 	"os"

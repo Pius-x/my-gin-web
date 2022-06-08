@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/my-gin-web/global"
+	"github.com/pkg/errors"
 )
 
 //数据库连接名配置
@@ -21,12 +22,12 @@ func SelectConn(connName ...string) *sqlx.DB {
 	case 1:
 		theConn = connName[0]
 	default:
-		panic("params num error.")
+		panic(errors.New("params num error"))
 	}
 
 	db, ok := global.DbMap[theConn]
 	if !ok || db == nil {
-		panic(fmt.Sprintf("%s no init", theConn))
+		panic(errors.New(fmt.Sprintf("%s no init", theConn)))
 	}
 	return db
 }

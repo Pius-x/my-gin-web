@@ -19,7 +19,7 @@ func NewModel() *Model {
 	}
 }
 
-func (This *Model) InsertNewRecord(recordInfo SysOperationRecord) {
+func (This *Model) InsertNewRecord(recordInfo TOperationLog) {
 	curTime := time.Now().Unix()
 	recordInfo.CreatedAt = curTime
 	recordInfo.UpdatedAt = curTime
@@ -33,7 +33,7 @@ values (:created_at, :updated_at, :ip, :method, :path, :status, :latency, :agent
 	}
 }
 
-func (This *Model) GetPageRecordByKey(info SysOperationRecordSearch) (recordList []SysOperationRecord, total int64) {
+func (This *Model) GetPageRecordByKey(info SearchOperationLog) (recordList []TOperationLog, total int64) {
 
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

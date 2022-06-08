@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/my-gin-web/model/common/response"
+	"github.com/my-gin-web/utils/answer"
 	"github.com/my-gin-web/utils/dbInstance"
 )
 
@@ -10,7 +10,7 @@ import (
 func NeedInit() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if dbInstance.SelectConn() == nil {
-			response.OkWithDetailed(gin.H{
+			answer.OkWithDetailed(gin.H{
 				"needInit": true,
 			}, "前往初始化数据库", c)
 			c.Abort()

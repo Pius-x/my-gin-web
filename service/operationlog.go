@@ -4,15 +4,16 @@ import (
 	"github.com/my-gin-web/model/operationlog"
 )
 
-type OperationRecordService struct{}
+type OperationLogService struct{}
 
-// CreateSysOperationRecord 创建一条操作记录
-func (This *OperationRecordService) CreateSysOperationRecord(sysOperationRecord operationlog.SysOperationRecord) {
-	operationLogModel.InsertNewRecord(sysOperationRecord)
+// CreateOperationLog 创建一条操作记录
+func (This *OperationLogService) CreateOperationLog(operationLog operationlog.TOperationLog) {
+	
+	operationLogModel.InsertNewRecord(operationLog)
 }
 
-// GetSysOperationRecordInfoList 分页获取操作记录列表
-func (This *OperationRecordService) GetSysOperationRecordInfoList(pageInfo operationlog.SysOperationRecordSearch) (list []operationlog.SysOperationRecord, total int64) {
+// GetOperationLogList 分页获取操作记录列表
+func (This *OperationLogService) GetOperationLogList(pageInfo operationlog.SearchOperationLog) (list []operationlog.TOperationLog, total int64) {
 
 	return operationLogModel.GetPageRecordByKey(pageInfo)
 }

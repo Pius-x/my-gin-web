@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/my-gin-web/global"
-	"github.com/my-gin-web/model/common/response"
+	"github.com/my-gin-web/utils/answer"
 	"go.uber.org/zap"
 	"os"
 )
@@ -53,18 +53,18 @@ func (e *ExcelApi) ImportExcel(c *gin.Context) {
 	_, header, err := c.Request.FormFile("file")
 	if err != nil {
 		global.ZapLog.Error("接收文件失败!", zap.Error(err))
-		response.FailWithMessage("接收文件失败", c)
+		answer.FailWithMessage("接收文件失败", c)
 		return
 	}
 	_ = c.SaveUploadedFile(header, global.Config.Excel.Dir+"ExcelImport.xlsx")
-	response.OkWithMessage("导入成功", c)
+	answer.OkWithMessage("导入成功", c)
 }
 
 // @Tags excel
 // @Summary 加载Excel数据
 // @Security ApiKeyAuth
 // @Produce  application/json
-// @Success 200 {object} response.Response{data=response.PageResult,msg=string} "加载Excel数据,返回包括列表,总数,页码,每页数量"
+// @Success 200 {object} response.Response{data=common.PageResult,msg=string} "加载Excel数据,返回包括列表,总数,页码,每页数量"
 // @Router /excel/loadExcel [get]
 //func (e *ExcelApi) LoadExcel(c *gin.Context) {
 //	menus, err := excelService.ParseExcel2InfoList()
@@ -73,7 +73,7 @@ func (e *ExcelApi) ImportExcel(c *gin.Context) {
 //		response.FailWithMessage("加载数据失败", c)
 //		return
 //	}
-//	response.OkWithDetailed(response.PageResult{
+//	response.OkWithDetailed(common.PageResult{
 //		List:  menus,
 //		Total: int64(len(menus)),
 //	}, "加载数据成功", c)
@@ -94,12 +94,12 @@ func (e *ExcelApi) DownloadTemplate(c *gin.Context) {
 	fi, err := os.Stat(filePath)
 	if err != nil {
 		global.ZapLog.Error("文件不存在!", zap.Error(err))
-		response.FailWithMessage("文件不存在", c)
+		answer.FailWithMessage("文件不存在", c)
 		return
 	}
 	if fi.IsDir() {
 		global.ZapLog.Error("不支持下载文件夹!", zap.Error(err))
-		response.FailWithMessage("不支持下载文件夹", c)
+		answer.FailWithMessage("不支持下载文件夹", c)
 		return
 	}
 	c.Writer.Header().Add("success", "true")

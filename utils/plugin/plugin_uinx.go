@@ -4,8 +4,8 @@
 package plugin
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"io/fs"
 	"io/ioutil"
 	"os"

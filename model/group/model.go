@@ -23,7 +23,7 @@ func (This *Model) GetRouterList(gid int64) string {
 
 	sql := "select router_list from gva.t_groups where gid = ?"
 	if err := This.db.Get(&routerString, sql, gid); err != nil {
-		return ""
+		return "[]"
 	}
 
 	return routerString
@@ -77,7 +77,7 @@ func (This *Model) GetOneGroupInfo(gid int64) (groupInfo GroupInfo) {
 	var tGroup TGroups
 
 	if err := This.db.Get(&tGroup, "select * from gva.t_groups where gid = ?", gid); err != nil {
-		panic(fmt.Sprintf("未找到分组信息，gid：%d", gid))
+		panic(errors.Wrap(err, fmt.Sprintf("未找到分组信息，gid：%d", gid)))
 	}
 
 	groupInfo = GroupInfo{

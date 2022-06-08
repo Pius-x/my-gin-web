@@ -3,10 +3,10 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/my-gin-web/global"
-	"github.com/my-gin-web/model/common/request"
-	"github.com/my-gin-web/model/common/response"
+	"github.com/my-gin-web/model/common"
 	"github.com/my-gin-web/model/example"
 	exampleRes "github.com/my-gin-web/model/example/response"
+	"github.com/my-gin-web/utils/answer"
 	"go.uber.org/zap"
 )
 
@@ -26,16 +26,16 @@ func (u *FileUploadAndDownloadApi) UploadFile(c *gin.Context) {
 	_, header, err := c.Request.FormFile("file")
 	if err != nil {
 		global.ZapLog.Error("接收文件失败!", zap.Error(err))
-		response.FailWithMessage("接收文件失败", c)
+		answer.FailWithMessage("接收文件失败", c)
 		return
 	}
 	err, file = FileUploadAndDownloadService.UploadFile(header, noSave) // 文件上传后拿到文件路径
 	if err != nil {
 		global.ZapLog.Error("修改数据库链接失败!", zap.Error(err))
-		response.FailWithMessage("修改数据库链接失败", c)
+		answer.FailWithMessage("修改数据库链接失败", c)
 		return
 	}
-	response.OkWithDetailed(exampleRes.ExaFileResponse{File: file}, "上传成功", c)
+	answer.OkWithDetailed(exampleRes.ExaFileResponse{File: file}, "上传成功", c)
 }
 
 // EditFileName 编辑文件名或者备注
@@ -44,10 +44,10 @@ func (u *FileUploadAndDownloadApi) EditFileName(c *gin.Context) {
 	_ = c.ShouldBindJSON(&file)
 	if err := FileUploadAndDownloadService.EditFileName(file); err != nil {
 		global.ZapLog.Error("编辑失败!", zap.Error(err))
-		response.FailWithMessage("编辑失败", c)
+		answer.FailWithMessage("编辑失败", c)
 		return
 	}
-	response.OkWithMessage("编辑成功", c)
+	answer.OkWithMessage("编辑成功", c)
 }
 
 // @Tags ExaFileUploadAndDownload
@@ -62,10 +62,10 @@ func (u *FileUploadAndDownloadApi) DeleteFile(c *gin.Context) {
 	_ = c.ShouldBindJSON(&file)
 	if err := FileUploadAndDownloadService.DeleteFile(file); err != nil {
 		global.ZapLog.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		answer.FailWithMessage("删除失败", c)
 		return
 	}
-	response.OkWithMessage("删除成功", c)
+	answer.OkWithMessage("删除成功", c)
 }
 
 // @Tags ExaFileUploadAndDownload
@@ -74,17 +74,17 @@ func (u *FileUploadAndDownloadApi) DeleteFile(c *gin.Context) {
 // @accept application/json
 // @Produce application/json
 // @Param data body request.PageInfo true "页码, 每页大小"
-// @Success 200 {object} response.Response{data=response.PageResult,msg=string} "分页文件列表,返回包括列表,总数,页码,每页数量"
+// @Success 200 {object} response.Response{data=common.PageResult,msg=string} "分页文件列表,返回包括列表,总数,页码,每页数量"
 // @Router /fileUploadAndDownload/getFileList [post]
 func (u *FileUploadAndDownloadApi) GetFileList(c *gin.Context) {
-	var pageInfo request.PageInfo
+	var pageInfo common.PageInfo
 	_ = c.ShouldBindJSON(&pageInfo)
 	err, list, total := FileUploadAndDownloadService.GetFileRecordInfoList(pageInfo)
 	if err != nil {
 		global.ZapLog.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		answer.FailWithMessage("获取失败", c)
 	} else {
-		response.OkWithDetailed(response.PageResult{
+		answer.OkWithDetailed(common.PageResult{
 			List:  list,
 			Total: total,
 		}, "获取成功", c)

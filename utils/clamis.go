@@ -3,11 +3,11 @@ package utils
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/my-gin-web/global"
-	systemReq "github.com/my-gin-web/model/system/request"
+	"github.com/my-gin-web/model/user"
 	"go.uber.org/zap"
 )
 
-func GetClaims(c *gin.Context) (*systemReq.CustomClaims, error) {
+func GetClaims(c *gin.Context) (*user.CustomClaims, error) {
 	token := c.Request.Header.Get("x-token")
 	j := NewJWT()
 	claims, err := j.ParseToken(token)
@@ -26,7 +26,7 @@ func GetOperatorID(c *gin.Context) int64 {
 			return cl.ID
 		}
 	} else {
-		waitUse := claims.(*systemReq.CustomClaims)
+		waitUse := claims.(*user.CustomClaims)
 		return waitUse.ID
 	}
 }
@@ -40,7 +40,7 @@ func GetOperatorAccount(c *gin.Context) string {
 			return cl.Account
 		}
 	} else {
-		waitUse := claims.(*systemReq.CustomClaims)
+		waitUse := claims.(*user.CustomClaims)
 		return waitUse.Account
 	}
 }
@@ -74,7 +74,7 @@ func GetOperatorAccount(c *gin.Context) string {
 //}
 
 // 从Gin的Context中获取从jwt解析出来的用户角色id
-func GetUserInfo(c *gin.Context) *systemReq.CustomClaims {
+func GetUserInfo(c *gin.Context) *user.CustomClaims {
 	if claims, exists := c.Get("claims"); !exists {
 		if cl, err := GetClaims(c); err != nil {
 			return nil
@@ -82,7 +82,7 @@ func GetUserInfo(c *gin.Context) *systemReq.CustomClaims {
 			return cl
 		}
 	} else {
-		waitUse := claims.(*systemReq.CustomClaims)
+		waitUse := claims.(*user.CustomClaims)
 		return waitUse
 	}
 }

@@ -40,16 +40,18 @@ func Routers() *gin.Engine {
 			c.JSON(200, "ok")
 		})
 	}
+
+	PublicGroup.Use(middleware.InterceptPublic())
 	{
 		routerGroup.InitBaseRouter(PublicGroup) // 注册基础功能路由 不做鉴权
 	}
 
 	PrivateGroup := Router.Group("")
-	PrivateGroup.Use(middleware.InterceptHandler())
+	PrivateGroup.Use(middleware.InterceptPrivate())
 	{
-		routerGroup.InitUserRouter(PrivateGroup)               // 注册用户路由
-		routerGroup.InitAuthorityRouter(PrivateGroup)          // 注册角色路由
-		routerGroup.InitSysOperationRecordRouter(PrivateGroup) // 操作记录
+		routerGroup.InitUserRouter(PrivateGroup)         // 注册用户路由
+		routerGroup.InitAuthorityRouter(PrivateGroup)    // 注册角色路由
+		routerGroup.InitOperationLogRouter(PrivateGroup) // 操作记录
 
 		//exampleRouter.InitExcelRouter(PrivateGroup)                 // 表格导入导出
 		//exampleRouter.InitCustomerRouter(PrivateGroup)              // 客户路由

@@ -2,11 +2,11 @@ package operationlog
 
 import (
 	"github.com/my-gin-web/global"
-	"github.com/my-gin-web/model/common/request"
+	"github.com/my-gin-web/model/common"
 )
 
-// SysOperationRecord 如果含有time.Time 请自行import time包
-type SysOperationRecord struct {
+// TOperationLog 操作记录表结构
+type TOperationLog struct {
 	global.GvaModel
 	Ip           string `json:"ip" form:"ip" db:"ip"`                               // 请求ip
 	Method       string `json:"method" form:"method" db:"method"`                   // 请求方法
@@ -20,7 +20,7 @@ type SysOperationRecord struct {
 	UserAccount  string `json:"user_account" form:"user_account" db:"user_account"` // 用户账号
 }
 
-type SysOperationRecordSearch struct {
-	SysOperationRecord
-	request.PageInfo
+type SearchOperationLog struct {
+	TOperationLog
+	common.PageInfo
 }

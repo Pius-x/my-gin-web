@@ -1,12 +1,12 @@
 package service
 
 import (
-	"errors"
+	"github.com/my-gin-web/model/common"
+	"github.com/pkg/errors"
 	"mime/multipart"
 	"strings"
 
 	"github.com/my-gin-web/global"
-	"github.com/my-gin-web/model/common/request"
 	"github.com/my-gin-web/model/example"
 	"github.com/my-gin-web/utils/upload"
 )
@@ -65,7 +65,7 @@ func (e *FileUploadAndDownloadService) EditFileName(file example.ExaFileUploadAn
 //@param: info request.PageInfo
 //@return: err error, list any, total int64
 
-func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageInfo) (err error, list any, total int64) {
+func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info common.PageInfo) (err error, list any, total int64) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	keyword := info.Keyword
@@ -78,7 +78,7 @@ func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageIn
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&fileLists).Error
+	err = db.Limit(int(limit)).Offset(int(offset)).Order("updated_at desc").Find(&fileLists).Error
 	return err, fileLists, total
 }
 
