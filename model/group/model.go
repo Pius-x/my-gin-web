@@ -21,7 +21,7 @@ type Model struct {
 func (This *Model) GetRouterList(gid int64) string {
 	var routerString string
 
-	sql := "select router_list from gva.t_groups where gid = ?"
+	sql := "select router_list from crazy_cms.cms_group where gid = ?"
 	if err := This.db.Get(&routerString, sql, gid); err != nil {
 		return "[]"
 	}
@@ -31,7 +31,7 @@ func (This *Model) GetRouterList(gid int64) string {
 
 func (This *Model) GetAllGroups() (allGroups []GroupInfo) {
 	var groups []TGroups
-	if err := This.db.Select(&groups, "SELECT * from gva.t_groups"); err != nil {
+	if err := This.db.Select(&groups, "SELECT * from crazy_cms.cms_group"); err != nil {
 		panic(errors.WithStack(err))
 	}
 
@@ -58,7 +58,7 @@ func (This *Model) GetAllGroups() (allGroups []GroupInfo) {
 }
 
 func (This *Model) GetGroupCountByGid(gid int64) (total int64) {
-	if err := This.db.Get(&total, "SELECT COUNT(1) from gva.t_groups where gid = ?", gid); err != nil {
+	if err := This.db.Get(&total, "SELECT COUNT(1) from crazy_cms.cms_group where gid = ?", gid); err != nil {
 		return 0
 	}
 
@@ -66,7 +66,7 @@ func (This *Model) GetGroupCountByGid(gid int64) (total int64) {
 }
 
 func (This *Model) GetGroupCountByParentGid(gid int64) (total int64) {
-	if err := This.db.Get(&total, "SELECT COUNT(1) from gva.t_groups where parent_gid = ?", gid); err != nil {
+	if err := This.db.Get(&total, "SELECT COUNT(1) from crazy_cms.cms_group where parent_gid = ?", gid); err != nil {
 		return 0
 	}
 
@@ -76,7 +76,7 @@ func (This *Model) GetGroupCountByParentGid(gid int64) (total int64) {
 func (This *Model) GetOneGroupInfo(gid int64) (groupInfo GroupInfo) {
 	var tGroup TGroups
 
-	if err := This.db.Get(&tGroup, "select * from gva.t_groups where gid = ?", gid); err != nil {
+	if err := This.db.Get(&tGroup, "select * from crazy_cms.cms_group where gid = ?", gid); err != nil {
 		panic(errors.Wrap(err, fmt.Sprintf("未找到分组信息，gid：%d", gid)))
 	}
 
@@ -97,7 +97,7 @@ func (This *Model) GetOneGroupInfo(gid int64) (groupInfo GroupInfo) {
 func (This *Model) GetOneGroupRouterList(gid int64) (routerList []RouteInfo) {
 
 	var routerInfo string
-	if err := This.db.Get(&routerInfo, "select router_list from gva.t_groups where gid = ?", gid); err != nil {
+	if err := This.db.Get(&routerInfo, "select router_list from crazy_cms.cms_group where gid = ?", gid); err != nil {
 		panic(errors.Wrap(err, fmt.Sprintf("权限列表为空，gid：%d", gid)))
 	}
 
@@ -112,7 +112,7 @@ func (This *Model) UpdateGroupRouter(gid int64, routerList []RouteInfo) {
 
 	routers, _ := json.Marshal(routerList)
 
-	sql := "UPDATE gva.t_groups SET router_list = ? WHERE gid = ?"
+	sql := "UPDATE crazy_cms.cms_group SET router_list = ? WHERE gid = ?"
 	_, err := This.db.Exec(sql, routers, gid)
 	if err != nil {
 		panic(errors.Wrap(err, "更新分组路由权限失败"))
@@ -121,14 +121,14 @@ func (This *Model) UpdateGroupRouter(gid int64, routerList []RouteInfo) {
 
 func (This *Model) UpdateGroupInfo(auth TGroups) {
 
-	sql := "UPDATE gva.t_groups SET gname = ?,parent_gid = ?,router_list = ? WHERE gid = ?"
+	sql := "UPDATE crazy_cms.cms_group SET gname = ?,parent_gid = ?,router_list = ? WHERE gid = ?"
 	if _, err := This.db.Exec(sql, auth.Gname, auth.ParentGid, auth.RouterList, auth.Gid); err != nil {
 		panic(errors.Wrap(err, "更新分组信息失败"))
 	}
 }
 
 func (This *Model) CreateNewGroup(auth TGroups) {
-	sql := `insert into gva.t_groups (gname, parent_gid, router_list, create_time, update_time)
+	sql := `insert into crazy_cms.cms_group (gname, parent_gid, router_list, create_time, update_time)
 values (:gname, :parent_gid, :router_list, :create_time, :update_time)`
 
 	if _, err := This.db.NamedExec(sql, auth); err != nil {
@@ -137,7 +137,7 @@ values (:gname, :parent_gid, :router_list, :create_time, :update_time)`
 }
 
 func (This *Model) DeleteOneGroup(gid int64) {
-	sql := `DELETE FROM gva.t_groups WHERE gid = ?`
+	sql := `DELETE FROM crazy_cms.cms_group WHERE gid = ?`
 	if _, err := This.db.Exec(sql, gid); err != nil {
 		panic(errors.Wrap(err, "删除分组失败"))
 	}

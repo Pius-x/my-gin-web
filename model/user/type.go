@@ -17,35 +17,59 @@ type ReqLogin struct {
 type ResLogin struct {
 	User      LoginInfo `json:"user"`
 	Token     string    `json:"token"`
-	ExpiresAt int64     `json:"expiresAt"`
+	ExpiresAt int64     `json:"expires_at"`
+}
+
+type LoginInfoRes struct {
+	Id            int64             `json:"id"`
+	Account       string            `json:"account"`         //账号
+	Gid           int64             `json:"gid"`             //分组ID
+	HeadPic       int64             `json:"head_pic"`        //头像ID
+	Name          string            `json:"name"`            //用户昵称
+	LastLoginTime int64             `json:"last_login_time"` //最后登录时间
+	RouterList    []group.RouteInfo `json:"router_list"`
+
+	BindFs    bool   `json:"bind_fs"`     // 是否绑定了飞书
+	FsHeadPic string `json:"fs_head_pic"` // 飞书账号头像
+	FsName    string `json:"fs_name"`     // 飞书账号名字
+	ExpiresAt int64  `json:"expires_at"`  // token 过期时间
+	Token     string `json:"token"`       // token信息
+}
+
+type FsLoginToken struct {
+	UserInfo string `json:"user_info"`
+}
+
+type FsBindToken struct {
+	BindFs    bool   `json:"bind_fs"`
+	FsHeadPic string `json:"fs_head_pic"`
+	FsName    string `json:"fs_name"`
 }
 
 type ResUserList struct {
 	Id         int64  `json:"id"`
-	Account    string `json:"account"`     //账号
-	Gid        int64  `json:"gid"`         //分组ID
-	Name       string `json:"name"`        //用户昵称
-	Mobile     string `json:"mobile"`      //手机号码
-	CreateTime string `json:"create_time"` //创建时间
-	CreateBy   string `json:"create_by"`   //创建人
-}
-
-type CoreInfo struct {
-	Id         int64  `json:"id" db:"id" form:"id"`
-	Account    string `json:"account" db:"account" form:"account"`             //账号
-	Gid        int64  `json:"gid" db:"gid" form:"gid"`                         //分组ID
-	Name       string `json:"name" db:"name" form:"name"`                      //用户昵称
-	Mobile     string `json:"mobile" db:"mobile" form:"mobile"`                //手机号码
-	CreateTime int64  `json:"create_time" db:"create_time" form:"create_time"` //创建时间
+	Account    string `json:"account"`     // 账号
+	Gid        int64  `json:"gid"`         // 分组ID
+	Name       string `json:"name"`        // 用户昵称
+	Mobile     string `json:"mobile"`      // 手机号码
+	CreateTime string `json:"create_time"` // 创建时间
+	CreateBy   string `json:"create_by"`   // 创建人
+	BindFs     bool   `json:"bind_fs"`     // 是否绑定飞书
 }
 
 type TUsers struct {
-	CoreInfo
+	Id            int64  `json:"id" db:"id" form:"id"`
+	Account       string `json:"account" db:"account" form:"account"`                         //账号
+	Gid           int64  `json:"gid" db:"gid" form:"gid"`                                     //分组ID
+	Name          string `json:"name" db:"name" form:"name"`                                  //用户昵称
+	Mobile        string `json:"mobile" db:"mobile" form:"mobile"`                            //手机号码
+	CreateTime    int64  `json:"create_time" db:"create_time" form:"create_time"`             //创建时间
 	Password      string `json:"password" db:"password" form:"password"`                      //密码
 	HeadPic       int64  `json:"head_pic" db:"head_pic" form:"head_pic"`                      //头像ID
 	UpdateTime    int64  `json:"update_time" db:"update_time" form:"update_time"`             //更新时间
 	LastLoginTime int64  `json:"last_login_time" db:"last_login_time" form:"last_login_time"` //最后登录时间
 	CreateBy      string `json:"create_by" db:"create_by" form:"create_by"`                   //创建人
+	BindFs        bool   `json:"bind_fs" db:"bind_fs" form:"bind_fs"`                         //是否绑定飞书
 }
 
 type LoginInfo struct {
@@ -100,11 +124,18 @@ type CustomClaims struct {
 type BaseClaims struct {
 	ID       int64
 	Account  string
+	Name     string
 	Password string
 }
 
 // ReqUserList Paging common input parameter structure
 type ReqUserList struct {
 	common.PageInfo
-	Gid int64 `form:"gid"` // 分组id
+	Gid           int64   `form:"gid"`             // 分组id
+	FilterGidList []int64 `form:"filter_gid_list"` // 筛选分组id列表
+}
+
+type RefreshUserInfo struct {
+	Gid        int64             `json:"gid"` //分组ID
+	RouterList []group.RouteInfo `json:"router_list"`
 }

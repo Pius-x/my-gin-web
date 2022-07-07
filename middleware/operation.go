@@ -26,7 +26,8 @@ func init() {
 func OperationRecord() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body []byte
-		var userAccount = ""
+		var userId = int64(0)
+		var userName = ""
 		if c.Request.Method != http.MethodGet {
 			var err error
 			body, err = ioutil.ReadAll(c.Request.Body)
@@ -51,18 +52,20 @@ func OperationRecord() gin.HandlerFunc {
 		}
 		claims, _ := utils.GetClaims(c)
 		if claims.Account != "" {
-			userAccount = claims.Account
+			userName = claims.Name
+			userId = claims.ID
 		} else {
-			userAccount = c.Request.Header.Get("x-account")
+			userName = c.Request.Header.Get("x-account")
 		}
 
 		record := operationlog.TOperationLog{
-			Ip:          c.ClientIP(),
-			Method:      c.Request.Method,
-			Path:        c.Request.URL.Path,
-			Agent:       c.Request.UserAgent(),
-			Body:        string(body),
-			UserAccount: userAccount,
+			Ip:       c.ClientIP(),
+			Method:   c.Request.Method,
+			Path:     c.Request.URL.Path,
+			Agent:    c.Request.UserAgent(),
+			Body:     string(body),
+			UserId:   userId,
+			UserName: userName,
 		}
 
 		// 上传文件时候 中间件日志进行裁断操作

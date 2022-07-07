@@ -1,0 +1,16 @@
+<html>
+<body>
+<h1>绑定成功，正在跳转中</h1>
+</body>
+<script>
+    window.location.href = window.location.origin
+
+    let userInfo = window.sessionStorage.getItem("user-info")
+    userInfo = JSON.parse(userInfo)
+    userInfo.bind_fs = "{{.BindFs}}"
+    userInfo.fs_head_pic = "{{.FsHeadPic}}"
+    userInfo.fs_name = "{{.FsName}}"
+    window.sessionStorage.setItem("user-info", JSON.stringify(userInfo))
+</script>
+
+</html>

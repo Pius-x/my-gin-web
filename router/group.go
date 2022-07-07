@@ -2,13 +2,12 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/my-gin-web/middleware"
 )
 
 type GroupRouter struct{}
 
 func (s *GroupRouter) InitAuthorityRouter(Router *gin.RouterGroup) {
-	groupRouter := Router.Group("group").Use(middleware.OperationRecord())
+	groupRouter := Router.Group("group")
 	{
 		groupRouter.GET("getGroupList", GroupApi.GetGroupList)            // 获取分组列表
 		groupRouter.POST("updateGroupRouter", GroupApi.UpdateGroupRouter) // 更新分组路由列表

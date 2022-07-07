@@ -38,23 +38,34 @@ db-log-zap: false
 db-list:
 - disable: false
   conn-name: "default"
-  path: 192.168.64.38
+  path: rm-wz9cf4358dw40iz94.mysql.rds.aliyuncs.com
   port: "3306"
   config: charset=utf8mb4&parseTime=True&loc=Local
   db-name: ""
   username: aroot
-  password: "123456"
+  password: "crazy_coin2020"
   max-idle-conns: 10
   max-open-conns: 100
 
 - disable: false
-  conn-name: "test"
-  path: 192.168.64.38
+  conn-name: "games"
+  path: rm-wz9cf4358dw40iz94.mysql.rds.aliyuncs.com
   port: "3306"
   config: charset=utf8mb4&parseTime=True&loc=Local
   db-name: ""
   username: aroot
-  password: "123456"
+  password: "crazy_coin2020"
+  max-idle-conns: 10
+  max-open-conns: 100
+
+- disable: false
+  conn-name: "slave_games"
+  path: rm-wz9cf4358dw40iz94.mysql.rds.aliyuncs.com
+  port: "3306"
+  config: charset=utf8mb4&parseTime=True&loc=Local
+  db-name: ""
+  username: aroot
+  password: "crazy_coin2020"
   max-idle-conns: 10
   max-open-conns: 100
 
@@ -66,6 +77,10 @@ email:
   is-ssl: true
   secret: xxx
   nickname: test
+fsLogin:
+    appID: cli_a23bce10d9f81013
+    appSecret: duIB6i8FsroLHfY5rPChCbA8zscgMYd8
+    redirectUri: http://127.0.0.1:8848/api
 excel:
   dir: ./resource/excel/
 jwt:

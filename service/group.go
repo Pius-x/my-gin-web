@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/my-gin-web/model/group"
 	"github.com/pkg/errors"
-	"strconv"
 	"time"
 )
 
@@ -104,14 +103,18 @@ func (This *GroupService) UpdateGroupRouterList(auth group.GroupInfo) {
 func (This *GroupService) UpdateGroup(auth group.TGroups) {
 
 	routerList := groupModel.GetOneGroupRouterList(auth.Gid)
-	parentRouterList := groupModel.GetOneGroupRouterList(auth.ParentGid)
+	if auth.ParentGid != 0 {
+		parentRouterList := groupModel.GetOneGroupRouterList(auth.ParentGid)
 
-	var routerMap = map[string]int64{}
-	for _, oneRouter := range routerList {
-		routerMap[oneRouter.Path] = oneRouter.Readonly
+		var routerMap = map[string]int64{}
+		for _, oneRouter := range routerList {
+			routerMap[oneRouter.Path] = oneRouter.Readonly
+		}
+
+		routerList = This.GetNewRouterByParentGid(parentRouterList, routerMap)
 	}
 
-	marshal, err := json.Marshal(This.GetNewRouterByParentGid(parentRouterList, routerMap))
+	marshal, err := json.Marshal(routerList)
 	if err != nil {
 		panic(errors.WithStack(err))
 	}
@@ -172,7 +175,7 @@ func (This GroupService) GetNewRouterByParentGid(parentRouter []group.RouteInfo,
 }
 
 // GetChildrenIdListByGid 获取子分组Id列表通过Gid
-func (This *GroupService) GetChildrenIdListByGid(gid int64) (gidArr []string) {
+func (This *GroupService) GetChildrenIdListByGid(gid int64, account string) []int64 {
 
 	groupList := This.GetGroupInfoList(gid)
 
@@ -183,12 +186,17 @@ func (This *GroupService) GetChildrenIdListByGid(gid int64) (gidArr []string) {
 		}
 	}
 
-	if gid == 0 {
-		gidList = append(gidList, 0)
+	var gidArr = make([]int64, 0, 10)
+	gidArr = append(gidArr, -1)
+	for i := 0; i < len(gidList); i++ {
+		if gidList[i] == gid {
+			continue
+		}
+		gidArr = append(gidArr, gidList[i])
 	}
 
-	for i := 0; i < len(gidList); i++ {
-		gidArr = append(gidArr, strconv.Itoa(int(gidList[i])))
+	if gid == 0 && account == "root" {
+		gidArr = append(gidArr, 0)
 	}
 
 	return gidArr
@@ -205,4 +213,14 @@ func (This *GroupService) findChildrenGid(gidList *[]int64, item group.GroupInfo
 	for _, item2 := range item.Children {
 		This.findChildrenGid(gidList, item2)
 	}
+}
+
+func (This *GroupService) GetGroupRouter(gid int64) (routerList []group.RouteInfo) {
+
+	var groupInfoString = groupModel.GetRouterList(gid)
+	if err := json.Unmarshal([]byte(groupInfoString), &routerList); err != nil {
+		panic(errors.Wrap(err, "权限列表解析失败"))
+	}
+
+	return routerList
 }

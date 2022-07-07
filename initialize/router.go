@@ -24,6 +24,7 @@ func Routers() *gin.Engine {
 	// Router.Static("/static", "./dist/assets")   // dist里面的静态资源
 	// Router.StaticFile("/", "./dist/index.html") // 前端网页入口页面
 
+	Router.LoadHTMLGlob("resource/view/*")
 	Router.StaticFS(global.Config.Local.Path, http.Dir(global.Config.Local.Path)) // 为用户头像和文件提供静态地址
 	// Router.Use(middleware.LoadTls())  // 如果需要使用https 请打开此中间件 然后前往 core/server.go 将启动模式 更变为 Router.RunTLS("端口","你的cre/pem文件","你的key文件")
 	global.ZapLog.Info("use middleware logger")
@@ -47,7 +48,7 @@ func Routers() *gin.Engine {
 	}
 
 	PrivateGroup := Router.Group("")
-	PrivateGroup.Use(middleware.InterceptPrivate())
+	PrivateGroup.Use(middleware.OperationRecord()).Use(middleware.InterceptPrivate())
 	{
 		routerGroup.InitUserRouter(PrivateGroup)         // 注册用户路由
 		routerGroup.InitAuthorityRouter(PrivateGroup)    // 注册角色路由

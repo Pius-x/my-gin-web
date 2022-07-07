@@ -1,0 +1,11 @@
+<html>
+<body>
+<h1>{{.Err}}, 3秒后回到登录界面</h1>
+</body>
+<script>
+    setTimeout(() => {
+        window.location.href = window.location.origin
+    }, 3000)
+</script>
+
+</html>

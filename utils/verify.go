@@ -1,7 +1,7 @@
 package utils
 
 var (
-	IdVerify                 = Rules{"ID": {NotEmpty()}}
+	IdVerify                 = Rules{"Id": {NotEmpty()}}
 	LoginVerify              = Rules{"Username": {NotEmpty()}, "Password": {NotEmpty()}}
 	UpdateUserInfoVerify     = Rules{"Id": {NotEmpty()}, "Name": {NotEmpty()}, "Mobile": {NotEmpty()}}
 	MultiUpdateUserGidVerify = Rules{"UserGidList": {NotEmpty()}}

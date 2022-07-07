@@ -19,13 +19,11 @@ func (This *UserService) CreateUserInfo(r user.CreateUserInfo) (err error) {
 	var curTime = time.Now().Unix()
 
 	createInfo := user.TUsers{
-		CoreInfo: user.CoreInfo{
-			Account:    r.Account,
-			Gid:        r.Gid,
-			Name:       r.Name,
-			Mobile:     r.Mobile,
-			CreateTime: curTime,
-		},
+		Account:       r.Account,
+		Gid:           r.Gid,
+		Name:          r.Name,
+		Mobile:        r.Mobile,
+		CreateTime:    curTime,
 		Password:      utils.BcryptHash("123456"),
 		HeadPic:       0,
 		CreateBy:      r.CreateBy,
@@ -85,7 +83,7 @@ func (This *UserService) UpdateHeadPic(u user.UpdateHeadPicStruct) {
 }
 
 // GetUserInfoList 分页获取用户列表
-func (This *UserService) GetUserInfoList(info user.ReqUserList) (list []user.ResUserList, total int64) {
+func (This *UserService) GetUserInfoList(info user.ReqUserList, gidList []int64) (list []user.ResUserList, total int64) {
 	limit := int64(10)
 	offset := int64(0)
 	if info.Keyword == "" {
@@ -93,11 +91,8 @@ func (This *UserService) GetUserInfoList(info user.ReqUserList) (list []user.Res
 		offset = info.PageSize * (info.Page - 1)
 	}
 
-	groupService := GroupService{}
-	var gidList = groupService.GetChildrenIdListByGid(info.Gid)
-
 	var tUsers []user.TUsers
-	var userList []user.ResUserList
+	var userList = make([]user.ResUserList, 0, limit)
 
 	if info.Keyword == "" {
 		userModel.GetPageUserInfo(&tUsers, &total, gidList, limit, offset)
@@ -114,6 +109,7 @@ func (This *UserService) GetUserInfoList(info user.ReqUserList) (list []user.Res
 		oneUserInfo.Mobile = oneUser.Mobile
 		oneUserInfo.CreateTime = time.Unix(oneUser.CreateTime, 0).Format("2006-01-02 15:04:05")
 		oneUserInfo.CreateBy = oneUser.CreateBy
+		oneUserInfo.BindFs = oneUser.BindFs
 		userList = append(userList, oneUserInfo)
 	}
 
@@ -143,10 +139,16 @@ func (This *UserService) GetUserListByGid(info common.GetByGid) (list []user.Res
 func (This *UserService) DeleteUser(id int64) {
 
 	userModel.DeleteUser(id)
+
+	fsUserModel.DelFsUserByCmsUserId(id)
 }
 
 // ResetPassword 修改用户密码
 func (This *UserService) ResetPassword(id int64) {
 
-	userModel.UpdateUserPwd(id, "123456")
+	userModel.UpdateUserPwd(id, utils.BcryptHash("123456"))
+}
+
+func (This *UserService) GetUserInfoById(id int64) (gid int64, err error) {
+	return userModel.GetGidById(id)
 }

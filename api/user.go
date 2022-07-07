@@ -11,12 +11,15 @@ import (
 type UserApi struct{}
 
 // CreateUserInfo 创建用户信息
-func (b *UserApi) CreateUserInfo(c *gin.Context) {
+func (Api *UserApi) CreateUserInfo(c *gin.Context) {
 
 	var r user.CreateUserInfo
 	utils.Verify(&r, utils.CreateUserInfoVerify, c)
 
 	r.CreateBy = utils.GetOperatorAccount(c)
+	if r.Gid == 0 && r.CreateBy != "root" {
+		answer.FailWithMessage("请选择用户分组", c)
+	}
 
 	if err := UserService.CreateUserInfo(r); err != nil {
 		answer.FailWithMessage(err.Error(), c)
@@ -26,7 +29,7 @@ func (b *UserApi) CreateUserInfo(c *gin.Context) {
 }
 
 // UpdateUserInfo 更新用户信息
-func (b *UserApi) UpdateUserInfo(c *gin.Context) {
+func (Api *UserApi) UpdateUserInfo(c *gin.Context) {
 
 	var r user.UpdateUserInfo
 	utils.Verify(&r, utils.UpdateUserInfoVerify, c)
@@ -38,7 +41,7 @@ func (b *UserApi) UpdateUserInfo(c *gin.Context) {
 }
 
 // MultiUpdateUserGid 批量更新用户Gid
-func (b *UserApi) MultiUpdateUserGid(c *gin.Context) {
+func (Api *UserApi) MultiUpdateUserGid(c *gin.Context) {
 
 	var userInfoList user.MultiUpdateUserGid
 	utils.Verify(&userInfoList, utils.MultiUpdateUserGidVerify, c)
@@ -49,7 +52,7 @@ func (b *UserApi) MultiUpdateUserGid(c *gin.Context) {
 }
 
 // ChangePassword 修改用户密码
-func (b *UserApi) ChangePassword(c *gin.Context) {
+func (Api *UserApi) ChangePassword(c *gin.Context) {
 
 	var oneUser user.ChangePasswordStruct
 	utils.Verify(&oneUser, utils.ChangePasswordVerify, c)
@@ -62,7 +65,7 @@ func (b *UserApi) ChangePassword(c *gin.Context) {
 }
 
 // UpdateHeadPic 修改用户头像
-func (b *UserApi) UpdateHeadPic(c *gin.Context) {
+func (Api *UserApi) UpdateHeadPic(c *gin.Context) {
 
 	var oneUser user.UpdateHeadPicStruct
 	utils.Verify(&oneUser, utils.UpdateHeadPicVerify, c)
@@ -73,12 +76,19 @@ func (b *UserApi) UpdateHeadPic(c *gin.Context) {
 }
 
 // GetUserList 获取用户列表
-func (b *UserApi) GetUserList(c *gin.Context) {
+func (Api *UserApi) GetUserList(c *gin.Context) {
 
 	var userListInfo user.ReqUserList
 	utils.Verify(&userListInfo, utils.UserInfoVerify, c)
 
-	list, total := UserService.GetUserInfoList(userListInfo)
+	account := utils.GetOperatorAccount(c)
+
+	var gidList = userListInfo.FilterGidList
+	if len(gidList) == 0 {
+		gidList = GroupService.GetChildrenIdListByGid(userListInfo.Gid, account)
+	}
+
+	list, total := UserService.GetUserInfoList(userListInfo, gidList)
 
 	answer.OkWithDetailed(common.PageResult{
 		List:  list,
@@ -87,7 +97,7 @@ func (b *UserApi) GetUserList(c *gin.Context) {
 }
 
 // GetUserListByGid 获取用户列表通过Gid
-func (b *UserApi) GetUserListByGid(c *gin.Context) {
+func (Api *UserApi) GetUserListByGid(c *gin.Context) {
 
 	var userListInfo common.GetByGid
 	utils.Verify(&userListInfo, utils.Rules{}, c)
@@ -101,27 +111,56 @@ func (b *UserApi) GetUserListByGid(c *gin.Context) {
 }
 
 // DeleteUser 通过id删除用户
-func (b *UserApi) DeleteUser(c *gin.Context) {
+func (Api *UserApi) DeleteUser(c *gin.Context) {
 
 	var reqId common.GetById
 	utils.Verify(&reqId, utils.IdVerify, c)
 
-	if utils.GetOperatorID(c) == reqId.ID {
+	if utils.GetOperatorID(c) == reqId.Id {
 		answer.FailWithMessage("删除用户失败，不能删除自己", c)
 	}
 
-	UserService.DeleteUser(reqId.ID)
+	UserService.DeleteUser(reqId.Id)
 
 	answer.OkWithMessage("删除成功", c)
 }
 
 // ResetPassword 重置密码
-func (b *UserApi) ResetPassword(c *gin.Context) {
+func (Api *UserApi) ResetPassword(c *gin.Context) {
 
-	var oneUser user.TUsers
-	utils.Verify(&oneUser, utils.Rules{}, c)
+	var reqId common.GetById
+	utils.Verify(&reqId, utils.IdVerify, c)
 
-	UserService.ResetPassword(oneUser.Id)
+	UserService.ResetPassword(reqId.Id)
 
 	answer.OkWithMessage("重置成功", c)
+}
+
+// UnBindFs 用户飞书ID解绑
+func (Api *UserApi) UnBindFs(c *gin.Context) {
+	var reqId common.GetById
+	utils.Verify(&reqId, utils.IdVerify, c)
+
+	UserService.UnbindFs(reqId.Id)
+
+	answer.OkWithMessage("解绑成功", c)
+}
+
+// GetUserInfoById 获取用户信息
+func (Api *UserApi) GetUserInfoById(c *gin.Context) {
+	var reqId common.GetById
+	utils.Verify(&reqId, utils.IdVerify, c)
+
+	gid, err := UserService.GetUserInfoById(reqId.Id)
+
+	routerList := GroupService.GetGroupRouter(gid)
+
+	if err != nil {
+		answer.FailWithMessage("获取信息失败", c)
+	} else {
+		answer.OkWithDetailed(user.RefreshUserInfo{
+			Gid:        gid,
+			RouterList: routerList,
+		}, "获取成功", c)
+	}
 }

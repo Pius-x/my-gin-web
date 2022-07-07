@@ -7,10 +7,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-//数据库连接名配置
+// 数据库连接名配置
 const (
-	DEFAULT = "default" // 默认数据库连接
-	TEST    = "test"    // 测试数据库名
+	Default    = "default"     // 默认数据库连接
+	Games      = "games"       // 游戏业务主库
+	SlaveGames = "slave_games" // 游戏业务从库
 )
 
 // SelectConn 通过连接名获取 DbMap 中的Db实例 如果不存在则panic
@@ -18,7 +19,7 @@ func SelectConn(connName ...string) *sqlx.DB {
 	var theConn string
 	switch len(connName) {
 	case 0:
-		theConn = DEFAULT
+		theConn = Default
 	case 1:
 		theConn = connName[0]
 	default:
