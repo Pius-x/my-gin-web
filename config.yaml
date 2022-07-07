@@ -38,34 +38,34 @@ db-log-zap: false
 db-list:
 - disable: false
   conn-name: "default"
-  path: rm-wz9cf4358dw40iz94.mysql.rds.aliyuncs.com
+  path: 192.168.64.38
   port: "3306"
   config: charset=utf8mb4&parseTime=True&loc=Local
   db-name: ""
   username: aroot
-  password: "crazy_coin2020"
+  password: "123456"
   max-idle-conns: 10
   max-open-conns: 100
 
 - disable: false
   conn-name: "games"
-  path: rm-wz9cf4358dw40iz94.mysql.rds.aliyuncs.com
+  path: 192.168.64.38
   port: "3306"
   config: charset=utf8mb4&parseTime=True&loc=Local
   db-name: ""
   username: aroot
-  password: "crazy_coin2020"
+  password: "123456"
   max-idle-conns: 10
   max-open-conns: 100
 
 - disable: false
   conn-name: "slave_games"
-  path: rm-wz9cf4358dw40iz94.mysql.rds.aliyuncs.com
+  path: 192.168.64.38
   port: "3306"
   config: charset=utf8mb4&parseTime=True&loc=Local
   db-name: ""
   username: aroot
-  password: "crazy_coin2020"
+  password: "123456"
   max-idle-conns: 10
   max-open-conns: 100
 
